@@ -14,4 +14,11 @@
 	<natures>
 		<nature>org.python.pydev.pythonNature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>configExplanation.txt</name>
+			<type>1</type>
+			<location>C:/Users/HH.Pic-p-127/Desktop/configExplanation.txt</location>
+		</link>
+	</linkedResources>
 </projectDescription>

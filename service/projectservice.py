@@ -4,12 +4,15 @@ import requests
 class Project(object):
     
     def __init__(self):
-        self.url = 'http://192.168.150.233:1002/api/projectList/load' 
+        self.url = 'http://192.168.150.233:4267/api/projectList/load' 
        
     def __getProjectName(self):
         result=requests.post(self.url)
-        #print result.text
-        print result.json()['PROJECTS']
+        
+        if result.text != u"null":
+            return result.json()['PROJECTS']
+        else:
+            return ""
           
     def callService(self):
         return self.__getProjectName()

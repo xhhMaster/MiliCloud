@@ -12,7 +12,7 @@ class SelectProjectTest(unittest.TestCase):
         self.workfile.show()
         app.exec_()         
     
-    def testGetShotInfo(self):
+    def testGetTaskInfo(self):
         print self.workfile.getTaskInfo()
         
         

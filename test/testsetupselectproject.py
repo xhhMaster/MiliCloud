@@ -12,11 +12,11 @@ class SelectProjectTest(unittest.TestCase):
         self.project.show()
         app.exec_()         
     
-    #def testGetProjectName(self):
-        #self.assertEqual(self.project.bindingProject(),None)  
+    def testGetProjectName(self):
+        self.project.bindingProject()
     
     def testSelectedClicked(self):
-        self.assertEqual(self.project.selectedClicked(),None)  
+        self.project.selectedClicked()  
     
 if __name__ == "__main__":  
     unittest.main()  

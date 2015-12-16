@@ -61,7 +61,7 @@ class Widget(QtGui.QWidget, Ui_Widget):
         if len(contents) > 0:
             for index,content in enumerate(contents):
                 #动态插入行
-                self.List.insertRow(index)
+                self.projectList.insertRow(index)
                 #抓去数据源id字段
                 itemId = QtGui.QTableWidgetItem(content['id'])
                 #抓去数据源name字段

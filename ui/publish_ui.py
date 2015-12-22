@@ -1,0 +1,48 @@
+# -*- coding: utf-8 -*-
+from PySide import QtCore, QtGui
+
+class Ui_Widget(object):
+    def setupUi(self, Widget):
+        Widget.setObjectName("Widget")
+        Widget.resize(647, 596)
+        Widget.setMaximumSize(647, 596)
+        Widget.setMinimumSize(647, 596)
+        self.descTxt = QtGui.QTextBrowser(Widget)
+        self.descTxt.setGeometry(QtCore.QRect(20, 10, 601, 61))
+        self.descTxt.setObjectName("descTxt")
+        self.imageBox = QtGui.QGroupBox(Widget)
+        self.imageBox.setGeometry(QtCore.QRect(290, 80, 331, 201))
+        self.imageBox.setObjectName("imageBox")
+        self.contentBox = QtGui.QGroupBox(Widget)
+        self.contentBox.setGeometry(QtCore.QRect(290, 300, 331, 201))
+        self.contentBox.setObjectName("contentBox")
+        self.contentTxt = QtGui.QTextBrowser(self.contentBox)
+        self.contentTxt.setGeometry(QtCore.QRect(10, 20, 311, 171))
+        self.contentTxt.setObjectName("contentTxt")
+        self.itemArea = QtGui.QScrollArea(Widget)
+        self.itemArea.setGeometry(QtCore.QRect(20, 90, 251, 411))
+        self.itemArea.setWidgetResizable(True)
+        self.itemArea.setObjectName("itemArea")
+        self.scrollAreaWidgetContents = QtGui.QWidget()
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 249, 409))
+        self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
+        self.itemlist = QtGui.QListWidget(self.scrollAreaWidgetContents)
+        self.itemlist.setGeometry(QtCore.QRect(10, 10, 231, 391))
+        self.itemlist.setObjectName("itemlist")
+        self.itemArea.setWidget(self.scrollAreaWidgetContents)
+        self.publishBtn = QtGui.QPushButton(Widget)
+        self.publishBtn.setGeometry(QtCore.QRect(440, 540, 75, 23))
+        self.publishBtn.setObjectName("publishBtn")
+        self.cancelBtn = QtGui.QPushButton(Widget)
+        self.cancelBtn.setGeometry(QtCore.QRect(540, 540, 75, 23))
+        self.cancelBtn.setObjectName("cancelBtn")
+
+        self.retranslateUi(Widget)
+        QtCore.QMetaObject.connectSlotsByName(Widget)
+
+    def retranslateUi(self, Widget):
+        Widget.setWindowTitle(QtGui.QApplication.translate("Widget", "发布", None, QtGui.QApplication.UnicodeUTF8))
+        self.imageBox.setTitle(QtGui.QApplication.translate("Widget", "缩略图", None, QtGui.QApplication.UnicodeUTF8))
+        self.contentBox.setTitle(QtGui.QApplication.translate("Widget", "备注", None, QtGui.QApplication.UnicodeUTF8))
+        self.publishBtn.setText(QtGui.QApplication.translate("Widget", "发布", None, QtGui.QApplication.UnicodeUTF8))
+        self.cancelBtn.setText(QtGui.QApplication.translate("Widget", "取消", None, QtGui.QApplication.UnicodeUTF8))

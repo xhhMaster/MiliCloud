@@ -15,6 +15,7 @@ encoding//test/testseupselectworkfiles.py=utf-8
 encoding//test/testshot.py=utf-8
 encoding//test/testtask.py=utf-8
 encoding//ui/newtask_ui.py=utf-8
+encoding//ui/publish_ui.py=utf-8
 encoding//ui/selectarea_ui.py=utf-8
 encoding//ui/selectproject_ui.py=utf-8
 encoding//ui/selectworkfiles_ui.py=utf-8

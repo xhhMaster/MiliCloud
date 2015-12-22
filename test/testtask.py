@@ -14,7 +14,7 @@ class MiliCloudTest(unittest.TestCase):
     
 
     def testGetTaskName(self):
-        print self.mili.callService('18','Asset') 
+        print self.mili.callService('20','Asset') 
     
   
 if __name__ == "__main__":  

@@ -30,7 +30,6 @@ class SelectedWorkFiles_UI(object):
         button= QtGui.QPushButton(u"单击此区域选择工作文件")
         button.setMaximumSize(600,300)
         button.setMinimumSize(600,300)
-        button.setText(u"单击此区域选择工作文件")
         button.setStyleSheet("font-size:30px;border:solid black 1px")
         button.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         button.clicked.connect(lambda *args: [self.btnClicked()])
@@ -41,10 +40,10 @@ class SelectedWorkFiles_UI(object):
         #显示窗口
         self.mainWindow.show()
         
-    def btnClicked(self,*args):
-        import setup.SetupSel        import setup.setupselectproject as SetupSelectProjectroject)
+    def btnClicked(self,*args):     
+        import setup.setupselectproject as setupselectproject
         self.mainWindow.close()
-        self.Widget = SetupSelectProject.Widget()
+        self.Widget = setupselectproject.Widget()
         self.Widget.show()      
         
             

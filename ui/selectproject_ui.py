@@ -27,6 +27,7 @@ class Ui_Widget(object):
         self.projectList.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
         self.projectList.resizeColumnsToContents()  
         self.projectList.resizeRowsToContents()
+        self.projectList.horizontalHeader().setStretchLastSection(True)#设置充满表宽度
         self.projectList.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
         font = QtGui.QFont()
         font.setFamily("Agency FB")
@@ -43,7 +44,6 @@ class Ui_Widget(object):
         self.cancelBtn = QtGui.QPushButton(Widget)
         self.cancelBtn.setGeometry(QtCore.QRect(320, 490, 75, 23))
         self.cancelBtn.setObjectName("cancelBtn")
-
         self.retranslateUi(Widget)
         QtCore.QMetaObject.connectSlotsByName(Widget)
 

@@ -8,7 +8,6 @@ class Shot(object):
        
     def __getShotName(self,projectID):
         result = requests.post(self.url+projectID)
-       
         if result.text != u"null":
             return result.json()['SHOTS']
         else:

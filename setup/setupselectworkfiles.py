@@ -157,7 +157,6 @@ class Widget(QtGui.QWidget, Ui_Widget):
             self.searchShotList.hide()
             self.__showWidget()
              
-       
     def __inputTaskTxtChanged(self):
         userInput = self.searchTasks.text()   
         self.searchTaskList = QtGui.QListWidget()
@@ -185,7 +184,6 @@ class Widget(QtGui.QWidget, Ui_Widget):
                 QtGui.QListWidgetItem(u'没有相关Task',self.searchTaskList)
                 self.tasksScrollArea.setWidget(self.searchTaskList)
             
-    
     def __bindingSearchShotData(self,userInput):
         self.searchShotList.clearContents()
         self.searchShotList.setRowCount(0)

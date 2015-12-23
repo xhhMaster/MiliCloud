@@ -30,7 +30,7 @@ class MenuGenerator(object):
         saveAs = cmds.menuItem(parent = miliCloudFileManage,label = self.saveAs)
         versionManage = cmds.menuItem(parent = miliCloudFileManage,label = self.versionManage)  
         
-        publish = cmds.menuItem(parent = self.mainMenu,label = self.publish)
+        publish = cmds.menuItem(parent = self.mainMenu,label = self.publish,c = self.publishDlg)
         loader = cmds.menuItem(parent = self.mainMenu,label = self.loader)
         breakdown = cmds.menuItem(parent = self.mainMenu,label = self.breakdown)
         snapshotManage = cmds.menuItem(parent = self.mainMenu,label = self.snapshotManage,subMenu = True)
@@ -41,6 +41,13 @@ class MenuGenerator(object):
     def showFileManageDlg(self,*args):
         import ui.selectarea_ui as selectarea_ui
         selectarea_ui.SelectedWorkFiles_UI()
+        
+    
+    def publishDlg(self,*args):
+        import setup.setuppublish as setuppublish
+        reload(setuppublish)
+        self.Widget = setuppublish.Widget()
+        self.Widget.show()
         
     def settingMenuLanguage(self,*args):
         if(self.flag):

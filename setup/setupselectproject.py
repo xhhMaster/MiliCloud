@@ -32,7 +32,7 @@ class Widget(QtGui.QWidget, Ui_Widget):
                 selectedDesc = u"暂无内容"
                        
             import setup.setupselectworkfiles as setupselectworkfiles
-            self.Widget = setupselectworkfiles.Widget(pid = selectedId,content = selectedContent,desc = selectedDesc )
+            self.Widget = setupselectworkfiles.Widget(pid = selectedId,content = selectedContent,desc = selectedDesc)
             self.Widget.show() 
             self.close()                
         else:

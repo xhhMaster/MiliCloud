@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import unittest
 from setup.setuppublish import Widget
+
+
 import sys
 from PySide import QtGui
 
@@ -13,7 +15,7 @@ class PublishTest(unittest.TestCase):
         app.exec_()         
     
     def testBtn(self):
-        self.project.getPath()
+        self.project.cancelBtnClicked()
     
 if __name__ == "__main__":  
     unittest.main()  

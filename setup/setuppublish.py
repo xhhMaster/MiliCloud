@@ -5,6 +5,7 @@ import os
 import maya.cmds as cmds
 import time
 
+
 class Widget(QtGui.QWidget, Ui_Widget):
     def __init__(self, parent=None):
         super(Widget,self).__init__(parent)
@@ -12,6 +13,8 @@ class Widget(QtGui.QWidget, Ui_Widget):
         self.bindingProjectComboBox()
         self.bindingTypeComboBox()
         self.bindingShotComboBox()
+        self.FileTxt.setMinimumWidth(500)
+        self.warning = self.__initMessageBox()
         self.projectComboBox.currentIndexChanged.connect(self.bindingTypeComboBox)
         self.projectComboBox.currentIndexChanged.connect(self.bindingShotComboBox)
         self.typeComboBox.currentIndexChanged.connect(self.bindingShotComboBox)
@@ -19,50 +22,75 @@ class Widget(QtGui.QWidget, Ui_Widget):
         self.cancelBtn.clicked.connect(self.cancelBtnClicked)
   
     def cancelBtnClicked(self):
-        #self.close()
-        self.save()
-        
+        self.close()
+
+       
         
     def save(self):
         self.path = 'D:\\Sence\\'
-        x = time.strftime('%Y-%m-%d',time.localtime(time.time()))
+        #获取当前日期
+        createDate = time.strftime('%Y-%m-%d',time.localtime(time.time()))
         #项目名称
         projectName = self.projectComboBox.currentText() 
         #所属类型
         ptype = self.typeComboBox.currentText()
+    
         #镜头号或者资产名
         content = self.shotComboBox.currentText()
         
         fileName = self.FileTxt.text()
-        if projectName !=  u'暂无项目请先创建' or fileName != '':
-            self.path = self.path + x + '\\' + projectName + '\\' + ptype + '\\' + content
-            self.fullpath =self.path +'\\' + fileName + '.mb'
+        if projectName !=  u'暂无项目请先创建' and fileName != '' and content != u'没有可选的镜头或者资产,请先去创建':
+            self.path = self.path + createDate + '\\' + projectName + '\\' + ptype + '\\' + content
+            self.subPath =  createDate + '\\' + projectName + '\\' + ptype + '\\' + content
+            self.fullpath ='D:\\123' +'\\' + fileName + '.mb'
             #判断目录是否存在
-            result = os.path.exists(self.path)
-            if not result:
-                os.makedirs(self.path)
-            cmds.file(rename = self.fullpath)
-            cmds.file(save =1,type='mayaBinary')
-            #return cmds.confirmDialog(b=u"确定",m=u"发布成功！",t=u"提示信息")
-            return u'发布成功'
+            resultDir = os.path.exists('D:\\123')
+            if not resultDir:
+                os.makedirs('D:\\123')
+                
+            #判断文件是否存在
+            resultFile = os.path.exists(self.fullpath)
+            if resultFile:
+                self.warning.setWindowTitle(u'警告信息')
+                self.warning.setIcon(QtGui.QMessageBox.Critical)
+                self.warning.setText(u"  发布失败！                                                                    ")
+                self.warning.setInformativeText(u"  当前文件名已经存在，请更改！")
+                self.warning.show()
+                return False
+            else:   
+                cmds.file(rename = self.fullpath)
+                cmds.file(save =1,type='mayaBinary')
+                self.warning.setIcon(QtGui.QMessageBox.NoIcon)
+                self.warning.setWindowTitle(u'提示信息')
+                self.warning.setText(u"  发布成功！                                                                                     ")
+                self.warning.setInformativeText('')
+                self.warning.show()
+                return True
         else:
-            return u'发布失败'
-            #return cmds.confirmDialog(b=u"确定",m=u"发布失败！！！请选择项目名称！",t=u"提示信息")
-           
-    
+            self.warning.setWindowTitle(u'警告信息')
+            self.warning.setIcon(QtGui.QMessageBox.Critical)
+            self.warning.setText(u"  发布失败！                                                                                ")
+            if projectName ==  u'暂无项目请先创建':
+                self.warning.setInformativeText(u"  请选择项目名！")
+            elif  content == u'没有可选的镜头或者资产,请先去创建':
+                self.warning.setInformativeText(u"  请选择所属类型！")
+            else:
+                self.warning.setInformativeText(u"  文件名为空，请输入文件名！")
+            self.warning.show()
+            return False
+        
         
     def publishClicked(self):
-        #self.save()
-
-
-        import service.publishservice as publishservice
-        publishservice.Publish().callService('D:\Sence\米粒云\Shot\收件箱\\a.mb')
+        if self.save():
+            import service.publishservice as publishservice
+            publishservice.Publish().callService(self.fullpath,self.subPath)
         
         
           
     
     #绑定项目名
     def bindingProjectComboBox(self):
+        self.projectComboBox.setMinimumWidth(500)
         import service.projectservice as projectservice
         contents = projectservice.Project().callService()
         self.projectList = self.__initTableWidget()
@@ -81,9 +109,9 @@ class Widget(QtGui.QWidget, Ui_Widget):
         else:
             self.projectComboBox.addItem(u"暂无项目请先创建")
            
-    
     #绑定类型名    
     def bindingTypeComboBox(self):
+        self.typeComboBox.setMinimumWidth(500)
         self.typeComboBox.clear()
         projectName = self.projectComboBox.currentText()
         if projectName != u'暂无项目请先创建':
@@ -92,9 +120,9 @@ class Widget(QtGui.QWidget, Ui_Widget):
         else:  
             self.typeComboBox.insertItem(0,u"请先选择项目")
 
-            
     #绑定镜头号或者资产名
     def bindingShotComboBox(self):
+        self.shotComboBox.setMinimumWidth(500)
         self.shotComboBox.clear()
         ptype = self.typeComboBox.currentText()
         pid = self.__getSelectedProjectId()
@@ -139,5 +167,10 @@ class Widget(QtGui.QWidget, Ui_Widget):
             for index,content in enumerate(sourceData):
                 self.shotComboBox.insertItem(index,content['name'])
         else:
-            self.shotComboBox.insertItem(0,u"没有可选的镜头或者资产,请先去创建!")
-       
+            self.shotComboBox.insertItem(0,u"没有可选的镜头或者资产,请先去创建")
+    
+    def __initMessageBox(self):
+        warning = QtGui.QMessageBox()
+        okBtn = warning.addButton(u'确定',QtGui.QMessageBox.AcceptRole)
+        okBtn.clicked.connect(warning.close)
+        return warning

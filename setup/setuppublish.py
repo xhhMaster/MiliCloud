@@ -4,7 +4,7 @@ from ui.publish_ui import Ui_Widget
 import os
 import maya.cmds as cmds
 import time
-
+import core.PIL as PIL
 
 class Widget(QtGui.QWidget, Ui_Widget):
     def __init__(self, parent=None):
@@ -24,8 +24,6 @@ class Widget(QtGui.QWidget, Ui_Widget):
     def cancelBtnClicked(self):
         self.close()
 
-       
-        
     def save(self):
         self.path = 'D:\\Sence\\'
         #获取当前日期
@@ -79,15 +77,11 @@ class Widget(QtGui.QWidget, Ui_Widget):
             self.warning.show()
             return False
         
-        
     def publishClicked(self):
         if self.save():
             import service.publishservice as publishservice
             publishservice.Publish().callService(self.fullpath,self.subPath)
         
-        
-          
-    
     #绑定项目名
     def bindingProjectComboBox(self):
         self.projectComboBox.setMinimumWidth(500)

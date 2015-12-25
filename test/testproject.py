@@ -4,7 +4,6 @@ from service.projectservice import Project
 
 class MiliCloudTest(unittest.TestCase):
     
-   
     def setUp(self):        
         self.mili = Project()
         

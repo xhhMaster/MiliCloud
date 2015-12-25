@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import requests 
+import core.requests as requests
 
 class Project(object):
     
@@ -8,7 +8,6 @@ class Project(object):
        
     def __getProjectName(self):
         result=requests.post(self.url)
-        
         if result.text != u"null":
             return result.json()['PROJECTS']
         else:

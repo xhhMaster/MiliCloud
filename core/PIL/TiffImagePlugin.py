@@ -15,12 +15,6 @@
 #
 # History:
 # 1995-09-01 fl   Created
-# 1996-05-04 fl   Handle JPEGTABLES tag
-# 1996-05-18 fl   Fixed COLORMAP support
-# 1997-01-05 fl   Fixed PREDICTOR support
-# 1997-08-27 fl   Added support for rational tags (from Perry Stoll)
-# 1998-01-10 fl   Fixed seek/tell (from Jan Blom)
-# 1998-07-15 fl   Use private names for internal variables
 # 1999-06-13 fl   Rewritten for PIL 1.0 (1.0)
 # 2000-10-11 fl   Additional fixes for Python 2.0 (1.1)
 # 2001-04-17 fl   Fixed rewind support (seek to frame 0) (1.2)
@@ -32,14 +26,17 @@
 # 2004-02-24 fl   Added DPI support; fixed rational write support
 # 2005-02-07 fl   Added workaround for broken Corel Draw 10 files
 # 2006-01-09 fl   Added support for float/double tags (from Russell Nelson)
+# 2009-03-06 fl   Added ICC support (from Florian Hoech)
+# 2009-03-08 fl   Added big endian save, etc (from Sebastian Haase)
+# 2010-04-25 fl   Added limited support for 16-bit RGB (1.3.6)
 #
-# Copyright (c) 1997-2006 by Secret Labs AB.  All rights reserved.
+# Copyright (c) 1997-2010 by Secret Labs AB.  All rights reserved.
 # Copyright (c) 1995-1997 by Fredrik Lundh
 #
 # See the README file for information on usage and redistribution.
 #
 
-__version__ = "1.3.5"
+__version__ = "1.3.6"
 
 import Image, ImageFile
 import ImagePalette
@@ -130,6 +127,7 @@ COMPRESSION_INFO = {
 OPEN_INFO = {
     # (ByteOrder, PhotoInterpretation, SampleFormat, FillOrder, BitsPerSample,
     #  ExtraSamples) => mode, rawmode
+    # FIXME: refactor to avoid repeating byteorder independent modes
     (II, 0, 1, 1, (1,), ()): ("1", "1;I"),
     (II, 0, 1, 2, (1,), ()): ("1", "1;IR"),
     (II, 0, 1, 1, (8,), ()): ("L", "L;I"),
@@ -141,6 +139,7 @@ OPEN_INFO = {
     (II, 1, 1, 2, (8,), ()): ("L", "L;R"),
     (II, 1, 1, 1, (16,), ()): ("I;16", "I;16"),
     (II, 1, 2, 1, (16,), ()): ("I;16S", "I;16S"),
+    (II, 1, 1, 1, (32,), ()): ("I", "I;32N"),
     (II, 1, 2, 1, (32,), ()): ("I", "I;32S"),
     (II, 1, 3, 1, (32,), ()): ("F", "F;32F"),
     (II, 2, 1, 1, (8,8,8), ()): ("RGB", "RGB"),
@@ -149,6 +148,7 @@ OPEN_INFO = {
     (II, 2, 1, 1, (8,8,8,8), (1,)): ("RGBA", "RGBa"),
     (II, 2, 1, 1, (8,8,8,8), (2,)): ("RGBA", "RGBA"),
     (II, 2, 1, 1, (8,8,8,8), (999,)): ("RGBA", "RGBA"), # corel draw 10
+    (II, 2, 1, 1, (16, 16, 16), ()): ("RGB", "RGB;16"),
     (II, 3, 1, 1, (1,), ()): ("P", "P;1"),
     (II, 3, 1, 2, (1,), ()): ("P", "P;1R"),
     (II, 3, 1, 1, (2,), ()): ("P", "P;2"),
@@ -181,6 +181,7 @@ OPEN_INFO = {
     (MM, 2, 1, 1, (8,8,8,8), (1,)): ("RGBA", "RGBa"),
     (MM, 2, 1, 1, (8,8,8,8), (2,)): ("RGBA", "RGBA"),
     (MM, 2, 1, 1, (8,8,8,8), (999,)): ("RGBA", "RGBA"), # corel draw 10
+    (MM, 2, 1, 1, (16, 16, 16), ()): ("RGB", "RGB;16B"),
     (MM, 3, 1, 1, (1,), ()): ("P", "P;1"),
     (MM, 3, 1, 2, (1,), ()): ("P", "P;1R"),
     (MM, 3, 1, 1, (2,), ()): ("P", "P;2"),
@@ -558,7 +559,7 @@ class TiffImageFile(ImageFile.ImageFile):
 
         return self.__frame
 
-    def _decoder(self, rawmode, layer):
+    def _decoder(self, rawmode, layer, tile=None):
         "Setup decoder contexts"
 
         args = None
@@ -579,6 +580,13 @@ class TiffImageFile(ImageFile.ImageFile):
             if self.tag.has_key(317):
                 # Section 14: Differencing Predictor
                 self.decoderconfig = (self.tag[PREDICTOR][0],)
+        elif compression in ["tiff_ccitt", "group3", "group4", "tiff_raw_16"]:
+             args = (rawmode,
+                     compression,
+                     (self.tag.has_key(FILLORDER)) \
+                         and self.tag[FILLORDER][0] or -1,
+                     (tile is not None and self.tag.has_key(STRIPBYTECOUNTS)) \
+                         and self.tag[STRIPBYTECOUNTS][tile] or -1)
 
         if self.tag.has_key(ICCPROFILE):
             self.info['icc_profile'] = self.tag[ICCPROFILE]
@@ -660,16 +668,15 @@ class TiffImageFile(ImageFile.ImageFile):
         self.tile = []
         if self.tag.has_key(STRIPOFFSETS):
             # striped image
+            offsets = self.tag[STRIPOFFSETS]
             h = getscalar(ROWSPERSTRIP, ysize)
             w = self.size[0]
-            a = None
-            for o in self.tag[STRIPOFFSETS]:
-                if not a:
-                    a = self._decoder(rawmode, l)
+            for i in range(len(offsets)):
+                a = self._decoder(rawmode, l, i)
                 self.tile.append(
                     (self._compression,
                     (0, min(y, ysize), w, min(y+h, ysize)),
-                    o, a))
+                    offsets[i], a))
                 y = y + h
                 if y >= self.size[1]:
                     x = y = 0
@@ -784,8 +791,7 @@ def _save(im, fp, filename):
     if im.encoderinfo.has_key("description"):
         ifd[IMAGEDESCRIPTION] = im.encoderinfo["description"]
     if im.encoderinfo.has_key("resolution"):
-        ifd[X_RESOLUTION] = ifd[Y_RESOLUTION] \
-                                = _cvt_res(im.encoderinfo["resolution"])
+        ifd[X_RESOLUTION] = ifd[Y_RESOLUTION] = _cvt_res(im.encoderinfo["resolution"])
     if im.encoderinfo.has_key("x resolution"):
         ifd[X_RESOLUTION] = _cvt_res(im.encoderinfo["x resolution"])
     if im.encoderinfo.has_key("y resolution"):
@@ -840,7 +846,6 @@ def _save(im, fp, filename):
     ImageFile._save(im, fp, [
         ("raw", (0,0)+im.size, offset, (rawmode, stride, 1))
         ])
-
 
     # -- helper for multi-page save --
     if im.encoderinfo.has_key("_debug_multipage"):

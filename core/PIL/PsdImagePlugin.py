@@ -175,12 +175,18 @@ def _layerinfo(file):
         # image info
         info = []
         mode = []
-        for i in range(i16(read(2))):
+        types = range(i16(read(2)))
+        if len(types) > 4:
+            continue
+
+        for i in types:
             type = i16(read(2))
+
             if type == 65535:
                 m = "A"
             else:
-                m = "RGB"[type]
+                m = "RGBA"[type]
+
             mode.append(m)
             size = i32(read(4))
             info.append((m, size))

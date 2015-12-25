@@ -24,7 +24,9 @@
 # See the README file for information on usage and redistribution.
 #
 
-VERSION = "1.1.7"
+__version__ = "1.1.7"
+
+VERSION = __version__  # pre-1.1.8 compatibility
 
 try:
     import warnings
@@ -51,9 +53,7 @@ try:
     # the "open" function to identify files, but you cannot load
     # them.  Note that other modules should not refer to _imaging
     # directly; import Image and use the Image.core variable instead.
-    import _imaging
-    core = _imaging
-    del _imaging
+    import _imaging as core
 except ImportError, v:
     core = _imaging_not_installed()
     if str(v)[:20] == "Module use of python" and warnings:
@@ -213,7 +213,7 @@ _MODE_CONV = {
     "RGBX": ('|u1', 4),
     "RGBA": ('|u1', 4),
     "CMYK": ('|u1', 4),
-    "YCbCr": ('|u1', 4),
+    "YCbCr": ('|u1', 3),
 }
 
 def _conv_type_shape(im):
@@ -1494,11 +1494,11 @@ class Image:
     def split(self):
         "Split image into bands"
 
+        self.load()
         if self.im.bands == 1:
             ims = [self.copy()]
         else:
             ims = []
-            self.load()
             for i in range(self.im.bands):
                 ims.append(self._new(self.im.getband(i)))
         return tuple(ims)
@@ -1547,8 +1547,8 @@ class Image:
 
         # preserve aspect ratio
         x, y = self.size
-        if x > size[0]: y = max(y * size[0] / x, 1); x = size[0]
-        if y > size[1]: x = max(x * size[1] / y, 1); y = size[1]
+        if x > size[0]: y = int(max(y * size[0] / x, 1)); x = int(size[0])
+        if y > size[1]: x = int(max(x * size[1] / y, 1)); y = int(size[1])
         size = x, y
 
         if size == self.size:

@@ -4,7 +4,7 @@ from ui.publish_ui import Ui_Widget
 import os
 import maya.cmds as cmds
 import time
-import core.PIL as PIL
+from core.PIL import ImageGrab  
 
 class Widget(QtGui.QWidget, Ui_Widget):
     def __init__(self, parent=None):
@@ -22,7 +22,8 @@ class Widget(QtGui.QWidget, Ui_Widget):
         self.cancelBtn.clicked.connect(self.cancelBtnClicked)
   
     def cancelBtnClicked(self):
-        self.close()
+        #self.close()
+        self.getThumbnails()
 
     def save(self):
         self.path = 'D:\\Sence\\'
@@ -130,7 +131,16 @@ class Widget(QtGui.QWidget, Ui_Widget):
             self.__addItemInShotComboBox(assetContents)
         else:
             self.shotComboBox.insertItem(0,u"请先选择类型")
-            
+      
+    def getThumbnails(self):
+        
+        im = ImageGrab.grab()
+        im.save('D:\123','jpg')
+        layout = QtGui.QVBoxLayout()
+        x = QtGui.QPixmap() 
+        layout.addWidget(x)     
+        self.imageBox.setLayout(layout)
+          
     def __initTableWidget(self):
         header = ['ID','Name']
         List = QtGui.QTableWidget()

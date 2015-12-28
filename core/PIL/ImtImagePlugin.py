@@ -15,18 +15,16 @@
 #
 
 
-import re
-
-from PIL import Image, ImageFile
-
 __version__ = "0.2"
 
+import re
+
+import Image, ImageFile
 
 #
 # --------------------------------------------------------------------
 
-field = re.compile(br"([a-z]*) ([^ \r\n]*)")
-
+field = re.compile(r"([a-z]*) ([^ \r\n]*)")
 
 ##
 # Image plugin for IM Tools images.
@@ -41,22 +39,22 @@ class ImtImageFile(ImageFile.ImageFile):
         # Quick rejection: if there's not a LF among the first
         # 100 bytes, this is (probably) not a text header.
 
-        if b"\n" not in self.fp.read(100):
-            raise SyntaxError("not an IM file")
+        if not "\n" in self.fp.read(100):
+            raise SyntaxError, "not an IM file"
         self.fp.seek(0)
 
         xsize = ysize = 0
 
-        while True:
+        while 1:
 
             s = self.fp.read(1)
             if not s:
                 break
 
-            if s == b'\x0C':
+            if s == chr(12):
 
                 # image data begins
-                self.tile = [("raw", (0, 0)+self.size,
+                self.tile = [("raw", (0,0)+self.size,
                              self.fp.tell(),
                              (self.mode, 0, 1))]
 
@@ -69,13 +67,13 @@ class ImtImageFile(ImageFile.ImageFile):
                 s = s + self.fp.readline()
                 if len(s) == 1 or len(s) > 100:
                     break
-                if s[0] == b"*":
-                    continue  # comment
+                if s[0] == "*":
+                    continue # comment
 
                 m = field.match(s)
                 if not m:
                     break
-                k, v = m.group(1, 2)
+                k, v = m.group(1,2)
                 if k == "width":
                     xsize = int(v)
                     self.size = xsize, ysize

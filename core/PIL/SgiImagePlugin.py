@@ -18,17 +18,21 @@
 #
 
 
-from PIL import Image, ImageFile, _binary
-
 __version__ = "0.2"
 
-i8 = _binary.i8
-i16 = _binary.i16be
+
+import Image, ImageFile
+
+
+def i16(c):
+    return ord(c[1]) + (ord(c[0])<<8)
+
+def i32(c):
+    return ord(c[3]) + (ord(c[2])<<8) + (ord(c[1])<<16) + (ord(c[0])<<24)
 
 
 def _accept(prefix):
-    return len(prefix) >= 2 and i16(prefix) == 474
-
+    return i16(prefix) == 474
 
 ##
 # Image plugin for SGI images.
@@ -43,13 +47,13 @@ class SgiImageFile(ImageFile.ImageFile):
         # HEAD
         s = self.fp.read(512)
         if i16(s) != 474:
-            raise ValueError("Not an SGI image file")
+            raise SyntaxError("not an SGI image file")
 
         # relevant header entries
-        compression = i8(s[2])
+        compression = ord(s[2])
 
         # bytes, dimension, zsize
-        layout = i8(s[3]), i16(s[4:]), i16(s[10:])
+        layout = ord(s[3]), i16(s[4:]), i16(s[10:])
 
         # determine mode from bytes/zsize
         if layout == (1, 2, 1) or layout == (1, 1, 1):
@@ -59,10 +63,11 @@ class SgiImageFile(ImageFile.ImageFile):
         elif layout == (1, 3, 4):
             self.mode = "RGBA"
         else:
-            raise ValueError("Unsupported SGI image mode")
+            raise SyntaxError("unsupported SGI image mode")
 
         # size
         self.size = i16(s[6:]), i16(s[8:])
+
 
         # decoder info
         if compression == 0:
@@ -70,20 +75,18 @@ class SgiImageFile(ImageFile.ImageFile):
             pagesize = self.size[0]*self.size[1]*layout[0]
             self.tile = []
             for layer in self.mode:
-                self.tile.append(
-                    ("raw", (0, 0)+self.size, offset, (layer, 0, -1)))
+                self.tile.append(("raw", (0,0)+self.size, offset, (layer,0,-1)))
                 offset = offset + pagesize
         elif compression == 1:
-            raise ValueError("SGI RLE encoding not supported")
+            self.tile = [("sgi_rle", (0,0)+self.size, 512, (self.mode, 0, -1))]
 
 #
 # registry
 
-Image.register_open(SgiImageFile.format, SgiImageFile, _accept)
+Image.register_open("SGI", SgiImageFile, _accept)
 
-Image.register_extension(SgiImageFile.format, ".bw")
-Image.register_extension(SgiImageFile.format, ".rgb")
-Image.register_extension(SgiImageFile.format, ".rgba")
-Image.register_extension(SgiImageFile.format, ".sgi")
+Image.register_extension("SGI", ".bw")
+Image.register_extension("SGI", ".rgb")
+Image.register_extension("SGI", ".rgba")
 
-# End of file
+Image.register_extension("SGI", ".sgi") # really?

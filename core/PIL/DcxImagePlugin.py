@@ -21,19 +21,19 @@
 # See the README file for information on usage and redistribution.
 #
 
-from PIL import Image, _binary
-from PIL.PcxImagePlugin import PcxImageFile
-
 __version__ = "0.2"
 
-MAGIC = 0x3ADE68B1  # QUIZ: what's this value, then?
+import Image
 
-i32 = _binary.i32le
+from PcxImagePlugin import PcxImageFile
 
+MAGIC = 0x3ADE68B1 # QUIZ: what's this value, then?
+
+def i32(c):
+    return ord(c[0]) + (ord(c[1])<<8) + (ord(c[2])<<16) + (ord(c[3])<<24)
 
 def _accept(prefix):
-    return len(prefix) >= 4 and i32(prefix) == MAGIC
-
+    return i32(prefix) == MAGIC
 
 ##
 # Image plugin for the Intel DCX format.
@@ -48,7 +48,7 @@ class DcxImageFile(PcxImageFile):
         # Header
         s = self.fp.read(4)
         if i32(s) != MAGIC:
-            raise SyntaxError("not a DCX file")
+            raise SyntaxError, "not a DCX file"
 
         # Component directory
         self._offset = []
@@ -60,14 +60,6 @@ class DcxImageFile(PcxImageFile):
 
         self.__fp = self.fp
         self.seek(0)
-
-    @property
-    def n_frames(self):
-        return len(self._offset)
-
-    @property
-    def is_animated(self):
-        return len(self._offset) > 1
 
     def seek(self, frame):
         if frame >= len(self._offset):
@@ -81,6 +73,6 @@ class DcxImageFile(PcxImageFile):
         return self.frame
 
 
-Image.register_open(DcxImageFile.format, DcxImageFile, _accept)
+Image.register_open("DCX", DcxImageFile, _accept)
 
-Image.register_extension(DcxImageFile.format, ".dcx")
+Image.register_extension("DCX", ".dcx")

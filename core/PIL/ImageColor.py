@@ -17,31 +17,38 @@
 # See the README file for information on usage and redistribution.
 #
 
-from PIL import Image
-import re
+import Image
+import re, string
 
+try:
+    x = int("a", 16)
+except TypeError:
+    # python 1.5.2 doesn't support int(x,b)
+    str2int = string.atoi
+else:
+    str2int = int
+
+##
+# Convert color string to RGB tuple.
+#
+# @param color A CSS3-style colour string.
+# @return An RGB-tuple.
+# @exception ValueError If the color string could not be interpreted
+#    as an RGB value.
 
 def getrgb(color):
-    """
-     Convert a color string to an RGB tuple. If the string cannot be parsed,
-     this function raises a :py:exc:`ValueError` exception.
-
-    .. versionadded:: 1.1.4
-
-    :param color: A color string
-    :return: ``(red, green, blue[, alpha])``
-    """
+    # FIXME: add RGBA support
     try:
         rgb = colormap[color]
     except KeyError:
         try:
             # fall back on case-insensitive lookup
-            rgb = colormap[color.lower()]
+            rgb = colormap[string.lower(color)]
         except KeyError:
             rgb = None
     # found color in cache
     if rgb:
-        if isinstance(rgb, tuple):
+        if isinstance(rgb, type(())):
             return rgb
         colormap[color] = rgb = getrgb(rgb)
         return rgb
@@ -49,30 +56,30 @@ def getrgb(color):
     m = re.match("#\w\w\w$", color)
     if m:
         return (
-            int(color[1]*2, 16),
-            int(color[2]*2, 16),
-            int(color[3]*2, 16)
+            str2int(color[1]*2, 16),
+            str2int(color[2]*2, 16),
+            str2int(color[3]*2, 16)
             )
     m = re.match("#\w\w\w\w\w\w$", color)
     if m:
         return (
-            int(color[1:3], 16),
-            int(color[3:5], 16),
-            int(color[5:7], 16)
+            str2int(color[1:3], 16),
+            str2int(color[3:5], 16),
+            str2int(color[5:7], 16)
             )
     m = re.match("rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$", color)
     if m:
         return (
-            int(m.group(1)),
-            int(m.group(2)),
-            int(m.group(3))
+            str2int(m.group(1)),
+            str2int(m.group(2)),
+            str2int(m.group(3))
             )
     m = re.match("rgb\(\s*(\d+)%\s*,\s*(\d+)%\s*,\s*(\d+)%\s*\)$", color)
     if m:
         return (
-            int((int(m.group(1)) * 255) / 100.0 + 0.5),
-            int((int(m.group(2)) * 255) / 100.0 + 0.5),
-            int((int(m.group(3)) * 255) / 100.0 + 0.5)
+            int((str2int(m.group(1)) * 255) / 100.0 + 0.5),
+            int((str2int(m.group(2)) * 255) / 100.0 + 0.5),
+            int((str2int(m.group(3)) * 255) / 100.0 + 0.5)
             )
     m = re.match("hsl\(\s*(\d+)\s*,\s*(\d+)%\s*,\s*(\d+)%\s*\)$", color)
     if m:
@@ -87,42 +94,19 @@ def getrgb(color):
             int(rgb[1] * 255 + 0.5),
             int(rgb[2] * 255 + 0.5)
             )
-    m = re.match("rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$",
-                 color)
-    if m:
-        return (
-            int(m.group(1)),
-            int(m.group(2)),
-            int(m.group(3)),
-            int(m.group(4))
-            )
     raise ValueError("unknown color specifier: %r" % color)
 
-
 def getcolor(color, mode):
-    """
-    Same as :py:func:`~PIL.ImageColor.getrgb`, but converts the RGB value to a
-    greyscale value if the mode is not color or a palette image. If the string
-    cannot be parsed, this function raises a :py:exc:`ValueError` exception.
-
-    .. versionadded:: 1.1.4
-
-    :param color: A color string
-    :return: ``(graylevel [, alpha]) or (red, green, blue[, alpha])``
-    """
     # same as getrgb, but converts the result to the given mode
-    color, alpha = getrgb(color), 255
-    if len(color) == 4:
-        color, alpha = color[0:3], color[3]
-
+    color = getrgb(color)
+    if mode == "RGB":
+        return color
+    if mode == "RGBA":
+        r, g, b = color
+        return r, g, b, 255
     if Image.getmodebase(mode) == "L":
         r, g, b = color
-        color = (r*299 + g*587 + b*114)//1000
-        if mode[-1] == 'A':
-            return (color, alpha)
-    else:
-        if mode[-1] == 'A':
-            return color + (alpha,)
+        return (r*299 + g*587 + b*114)/1000
     return color
 
 colormap = {

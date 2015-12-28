@@ -16,28 +16,24 @@
 # See the README file for information on usage and redistribution.
 #
 
-from PIL import Image, ImageColor, ImageDraw, ImageFont, ImagePath
+import Image, ImageColor, ImageDraw, ImageFont, ImagePath
 
-
-class Pen(object):
+class Pen:
     def __init__(self, color, width=1, opacity=255):
         self.color = ImageColor.getrgb(color)
         self.width = width
 
-
-class Brush(object):
+class Brush:
     def __init__(self, color, opacity=255):
         self.color = ImageColor.getrgb(color)
 
-
-class Font(object):
+class Font:
     def __init__(self, color, file, size=12):
         # FIXME: add support for bitmap fonts
         self.color = ImageColor.getrgb(color)
         self.font = ImageFont.truetype(file, size)
 
-
-class Draw(object):
+class Draw:
 
     def __init__(self, image, size=None, color=None):
         if not hasattr(image, "im"):
@@ -51,8 +47,7 @@ class Draw(object):
 
     def render(self, op, xy, pen, brush=None):
         # handle color arguments
-        outline = fill = None
-        width = 1
+        outline = fill = None; width = 1
         if isinstance(pen, Pen):
             outline = pen.color
             width = pen.width
@@ -73,8 +68,7 @@ class Draw(object):
         else:
             getattr(self.draw, op)(xy, fill=fill, outline=outline)
 
-    def settransform(self, offset):
-        (xoffset, yoffset) = offset
+    def settransform(self, (xoffset, yoffset)):
         self.transform = (1, 0, xoffset, 0, 1, yoffset)
 
     def arc(self, xy, start, end, *options):

@@ -15,23 +15,28 @@
 #
 
 import os
-from PIL import Image, _binary
+import Image
+
+import marshal
+
+try:
+    import zlib
+except ImportError:
+    zlib = None
 
 WIDTH = 800
-
 
 def puti16(fp, values):
     # write network order (big-endian) 16-bit sequence
     for v in values:
         if v < 0:
-            v += 65536
-        fp.write(_binary.o16be(v))
-
+            v = v + 65536
+        fp.write(chr(v>>8&255) + chr(v&255))
 
 ##
 # Base class for raster font file handlers.
 
-class FontFile(object):
+class FontFile:
 
     bitmap = None
 
@@ -58,7 +63,7 @@ class FontFile(object):
                 h = max(h, src[3] - src[1])
                 w = w + (src[2] - src[0])
                 if w > WIDTH:
-                    lines += 1
+                    lines = lines + 1
                     w = (src[2] - src[0])
                 maxwidth = max(maxwidth, w)
 
@@ -78,8 +83,7 @@ class FontFile(object):
             glyph = self[i]
             if glyph:
                 d, dst, src, im = glyph
-                xx = src[2] - src[0]
-                # yy = src[3] - src[1]
+                xx, yy = src[2] - src[0], src[3] - src[1]
                 x0, y0 = x, y
                 x = x + xx
                 if x > WIDTH:
@@ -91,8 +95,9 @@ class FontFile(object):
                 # print chr(i), dst, s
                 self.metrics[i] = d, dst, s
 
-    def save(self, filename):
-        "Save font"
+
+    def save1(self, filename):
+        "Save font in version 1 format"
 
         self.compile()
 
@@ -101,9 +106,9 @@ class FontFile(object):
 
         # font metrics
         fp = open(os.path.splitext(filename)[0] + ".pil", "wb")
-        fp.write(b"PILfont\n")
-        fp.write((";;;;;;%d;\n" % self.ysize).encode('ascii'))  # HACK!!!
-        fp.write(b"DATA\n")
+        fp.write("PILfont\n")
+        fp.write(";;;;;;%d;\n" % self.ysize) # HACK!!!
+        fp.write("DATA\n")
         for id in range(256):
             m = self.metrics[id]
             if not m:
@@ -112,4 +117,30 @@ class FontFile(object):
                 puti16(fp, m[0] + m[1] + m[2])
         fp.close()
 
-# End of file
+
+    def save2(self, filename):
+        "Save font in version 2 format"
+
+        # THIS IS WORK IN PROGRESS
+
+        self.compile()
+
+        data = marshal.dumps((self.metrics, self.info))
+
+        if zlib:
+            data = "z" + zlib.compress(data, 9)
+        else:
+            data = "u" + data
+
+        fp = open(os.path.splitext(filename)[0] + ".pil", "wb")
+
+        fp.write("PILfont2\n" + self.name + "\n" + "DATA\n")
+
+        fp.write(data)
+
+        self.bitmap.save(fp, "PNG")
+
+        fp.close()
+
+
+    save = save1 # for now

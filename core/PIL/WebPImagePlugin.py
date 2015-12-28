@@ -12,7 +12,6 @@ _VALID_WEBP_MODES = {
 _VP8_MODES_BY_IDENTIFIER = {
     b"VP8 ": "RGB",
     b"VP8X": "RGBA",
-    b"VP8L": "RGBA",  # lossless
     }
 
 
@@ -30,21 +29,10 @@ class WebPImageFile(ImageFile.ImageFile):
     format_description = "WebP image"
 
     def _open(self):
-        data, width, height, self.mode, icc_profile, exif = \
-            _webp.WebPDecode(self.fp.read())
-
-        if icc_profile:
-            self.info["icc_profile"] = icc_profile
-        if exif:
-            self.info["exif"] = exif
-
+        data, width, height, self.mode = _webp.WebPDecode(self.fp.read())
         self.size = width, height
         self.fp = BytesIO(data)
         self.tile = [("raw", (0, 0) + self.size, 0, self.mode)]
-
-    def _getexif(self):
-        from PIL.JpegImagePlugin import _getexif
-        return _getexif(self)
 
 
 def _save(im, fp, filename):
@@ -52,29 +40,20 @@ def _save(im, fp, filename):
     if im.mode not in _VALID_WEBP_MODES:
         raise IOError("cannot write mode %s as WEBP" % image_mode)
 
-    lossless = im.encoderinfo.get("lossless", False)
     quality = im.encoderinfo.get("quality", 80)
-    icc_profile = im.encoderinfo.get("icc_profile", "")
-    exif = im.encoderinfo.get("exif", "")
 
     data = _webp.WebPEncode(
         im.tobytes(),
         im.size[0],
         im.size[1],
-        lossless,
         float(quality),
-        im.mode,
-        icc_profile,
-        exif
-    )
-    if data is None:
-        raise IOError("cannot write file as WEBP (encoder returned None)")
-
+		im.mode
+        )
     fp.write(data)
 
 
-Image.register_open(WebPImageFile.format, WebPImageFile, _accept)
-Image.register_save(WebPImageFile.format, _save)
+Image.register_open("WEBP", WebPImageFile, _accept)
+Image.register_save("WEBP", _save)
 
-Image.register_extension(WebPImageFile.format, ".webp")
-Image.register_mime(WebPImageFile.format, "image/webp")
+Image.register_extension("WEBP", ".webp")
+Image.register_mime("WEBP", "image/webp")

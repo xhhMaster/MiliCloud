@@ -10,6 +10,7 @@ encoding//setup/setupnewtask.py=utf-8
 encoding//setup/setuppublish.py=utf-8
 encoding//setup/setupselectproject.py=utf-8
 encoding//setup/setupselectworkfiles.py=utf-8
+encoding//test/testImage.py=utf-8
 encoding//test/testasset.py=utf-8
 encoding//test/testproject.py=utf-8
 encoding//test/testpublish.py=utf-8

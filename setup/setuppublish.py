@@ -4,7 +4,7 @@ from ui.publish_ui import Ui_Widget
 import os
 import maya.cmds as cmds
 import time
-from core.PIL import ImageGrab  
+import core.PIL as PIL
 
 class Widget(QtGui.QWidget, Ui_Widget):
     def __init__(self, parent=None):
@@ -133,14 +133,10 @@ class Widget(QtGui.QWidget, Ui_Widget):
             self.shotComboBox.insertItem(0,u"请先选择类型")
       
     def getThumbnails(self):
-        
-        im = ImageGrab.grab()
-        im.save('D:\123','jpg')
-        layout = QtGui.QVBoxLayout()
-        x = QtGui.QPixmap() 
-        layout.addWidget(x)     
-        self.imageBox.setLayout(layout)
+        print dir(PIL.Image)
+
           
+    
     def __initTableWidget(self):
         header = ['ID','Name']
         List = QtGui.QTableWidget()
@@ -173,6 +169,7 @@ class Widget(QtGui.QWidget, Ui_Widget):
         else:
             self.shotComboBox.insertItem(0,u"没有可选的镜头或者资产,请先去创建")
     
+    #初始化提示框
     def __initMessageBox(self):
         warning = QtGui.QMessageBox()
         okBtn = warning.addButton(u'确定',QtGui.QMessageBox.AcceptRole)

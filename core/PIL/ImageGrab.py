@@ -15,57 +15,53 @@
 # See the README file for information on usage and redistribution.
 #
 
-import Image
+from PIL import Image
 
-##
-# (New in 1.1.3)  The <b>ImageGrab</b> module can be used to copy
-# the contents of the screen to a PIL image memory.
-# <p>
-# The current version works on Windows only.</p>
-#
-# @since 1.1.3
-##
+import sys
+if sys.platform not in ["win32", "darwin"]:
+    raise ImportError("ImageGrab is OS X and Windows only")
 
-try:
-    # built-in driver (1.1.3 and later)
-    grabber = Image.core.grabscreen
-except AttributeError:
-    # stand-alone driver (pil plus)
-    import _grabscreen
-    grabber = _grabscreen.grab
+if sys.platform == "win32":
+    try:
+        # built-in driver (1.1.3 and later)
+        grabber = Image.core.grabscreen
+    except AttributeError:
+        # stand-alone driver (pil plus)
+        import _grabscreen
+        grabber = _grabscreen.grab
+elif sys.platform == "darwin":
+    import os
+    import tempfile
+    import subprocess
 
-##
-# (New in 1.1.3) Take a snapshot of the screen.  The pixels inside the
-# bounding box are returned as an "RGB" image.  If the bounding box is
-# omitted, the entire screen is copied.
-#
-# @param bbox What region to copy.  Default is the entire screen.
-# @return An image
-# @since 1.1.3
 
 def grab(bbox=None):
-    size, data = grabber()
-    im = Image.fromstring(
-        "RGB", size, data,
-        # RGB, 32-bit line padding, origo in lower left corner
-        "raw", "BGR", (size[0]*3 + 3) & -4, -1
-        )
+    if sys.platform == "darwin":
+        f, file = tempfile.mkstemp('.png')
+        os.close(f)
+        subprocess.call(['screencapture', '-x', file])
+        im = Image.open(file)
+        im.load()
+        os.unlink(file)
+    else:
+        size, data = grabber()
+        im = Image.frombytes(
+            "RGB", size, data,
+            # RGB, 32-bit line padding, origo in lower left corner
+            "raw", "BGR", (size[0]*3 + 3) & -4, -1
+            )
     if bbox:
         im = im.crop(bbox)
     return im
 
-##
-# (New in 1.1.4) Take a snapshot of the clipboard image, if any.
-#
-# @return An image, a list of filenames, or None if the clipboard does
-#     not contain image data or filenames.  Note that if a list is
-#     returned, the filenames may not represent image files.
-# @since 1.1.4
 
 def grabclipboard():
-    debug = 0 # temporary interface
+    if sys.platform == "darwin":
+        raise NotImplementedError("Method is not implemented on OS X")
+    debug = 0  # temporary interface
     data = Image.core.grabclipboard(debug)
-    if Image.isStringType(data):
-        import BmpImagePlugin, StringIO
-        return BmpImagePlugin.DibImageFile(StringIO.StringIO(data))
+    if isinstance(data, bytes):
+        from PIL import BmpImagePlugin
+        import io
+        return BmpImagePlugin.DibImageFile(io.BytesIO(data))
     return data

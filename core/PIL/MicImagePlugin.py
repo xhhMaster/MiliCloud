@@ -17,11 +17,10 @@
 #
 
 
+from PIL import Image, TiffImagePlugin
+from PIL.OleFileIO import MAGIC, OleFileIO
+
 __version__ = "0.1"
-
-
-import Image, TiffImagePlugin
-from OleFileIO import *
 
 
 #
@@ -30,6 +29,7 @@ from OleFileIO import *
 
 def _accept(prefix):
     return prefix[:8] == MAGIC
+
 
 ##
 # Image plugin for Microsoft's Image Composer file format.
@@ -47,20 +47,20 @@ class MicImageFile(TiffImagePlugin.TiffImageFile):
         try:
             self.ole = OleFileIO(self.fp)
         except IOError:
-            raise SyntaxError, "not an MIC file; invalid OLE file"
+            raise SyntaxError("not an MIC file; invalid OLE file")
 
         # find ACI subfiles with Image members (maybe not the
         # best way to identify MIC files, but what the... ;-)
 
         self.images = []
-        for file in self.ole.listdir():
-            if file[1:] and file[0][-4:] == ".ACI" and file[1] == "Image":
-                self.images.append(file)
+        for path in self.ole.listdir():
+            if path[1:] and path[0][-4:] == ".ACI" and path[1] == "Image":
+                self.images.append(path)
 
         # if we didn't find any images, this is probably not
         # an MIC file.
         if not self.images:
-            raise SyntaxError, "not an MIC file; no image entries"
+            raise SyntaxError("not an MIC file; no image entries")
 
         self.__fp = self.fp
         self.frame = 0
@@ -70,12 +70,20 @@ class MicImageFile(TiffImagePlugin.TiffImageFile):
 
         self.seek(0)
 
+    @property
+    def n_frames(self):
+        return len(self.images)
+
+    @property
+    def is_animated(self):
+        return len(self.images) > 1
+
     def seek(self, frame):
 
         try:
             filename = self.images[frame]
         except IndexError:
-            raise EOFError, "no such frame"
+            raise EOFError("no such frame")
 
         self.fp = self.ole.openstream(filename)
 
@@ -90,6 +98,6 @@ class MicImageFile(TiffImagePlugin.TiffImageFile):
 #
 # --------------------------------------------------------------------
 
-Image.register_open("MIC", MicImageFile, _accept)
+Image.register_open(MicImageFile.format, MicImageFile, _accept)
 
-Image.register_extension("MIC", ".mic")
+Image.register_extension(MicImageFile.format, ".mic")

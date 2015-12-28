@@ -16,13 +16,15 @@
 # See the README file for information on usage and redistribution.
 #
 
+import struct
+from PIL import Image, ImageFile
+
 __version__ = "0.2"
 
-import struct
-import Image, ImageFile
 
 def _accept(s):
-    return s[:8] == "\x00\x00\x00\x00\x00\x00\x00\x04"
+    return s[:8] == b"\x00\x00\x00\x00\x00\x00\x00\x04"
+
 
 ##
 # Image plugin for McIdas area images.
@@ -47,10 +49,12 @@ class McIdasImageFile(ImageFile.ImageFile):
             mode = rawmode = "L"
         elif w[11] == 2:
             # FIXME: add memory map support
-            mode = "I"; rawmode = "I;16B"
+            mode = "I"
+            rawmode = "I;16B"
         elif w[11] == 4:
             # FIXME: add memory map support
-            mode = "I"; rawmode = "I;32B"
+            mode = "I"
+            rawmode = "I;32B"
         else:
             raise SyntaxError("unsupported McIdas format")
 

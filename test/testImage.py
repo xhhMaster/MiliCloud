@@ -1,1 +1,3 @@
-# -*- coding: utf-8 -*-
+import common.screenshot as screenshot
+
+screenshot.ScreenImage()

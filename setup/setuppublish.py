@@ -5,6 +5,7 @@ import os
 import maya.cmds as cmds
 import time
 import ctypes 
+from mhlib import PATH
 
 class Widget(QtGui.QWidget, Ui_Widget):
     def __init__(self, parent=None):
@@ -135,8 +136,9 @@ class Widget(QtGui.QWidget, Ui_Widget):
     def getThumbnails(self):
         try:  
             #加载QQ抓图使用的dll  
-            print os.path.dirname(__file__)
-            dll_handle = ctypes.cdll.LoadLibrary('Camera.dll')   
+            path =  os.path.dirname(__file__)+'\\Camera.dll'
+            print path
+            dll_handle = ctypes.cdll.LoadLibrary(path)   
         except Exception:  
             try:  
                 #如果dll加载失败，则换种方法使用，直接运行，如果还失败，退出  

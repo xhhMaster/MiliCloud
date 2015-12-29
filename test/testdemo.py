@@ -1,15 +1,14 @@
-def deco(func):
-    def _deco():
-        print("before myfunc() called.")
-        func()
-        print("  after myfunc() called.")
-       
-    return _deco
- 
-@deco
-def myfunc():
-    print(" myfunc() called.")
-  
- 
-myfunc()
-myfunc()
+# -*- coding: utf-8 -*-
+from PySide import QtGui
+
+class Demo(QtGui.QWidget):
+    
+    def __init__(self):
+        self.shootScreen()
+    
+    def shootScreen(self):
+        
+        self.originalPixmap = None
+        self.originalPixmap = QtGui.QPixmap.grabWindow(QtGui.QApplication.desktop().winId())
+        self.updateScreenshotLabel()
+        

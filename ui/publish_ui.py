@@ -54,7 +54,6 @@ class Ui_Widget(object):
         self.FileTxt = QtGui.QLineEdit(self.formLayoutWidget)
         self.FileTxt.setObjectName("FileTxt")
         self.formLayout.setWidget(3, QtGui.QFormLayout.FieldRole, self.FileTxt)
-
         self.retranslateUi(Widget)
         QtCore.QMetaObject.connectSlotsByName(Widget)
 
@@ -68,3 +67,5 @@ class Ui_Widget(object):
         self.shotLabel.setText(QtGui.QApplication.translate("Widget", "所属类型", None, QtGui.QApplication.UnicodeUTF8))
         self.shotLabel_2.setText(QtGui.QApplication.translate("Widget", "镜头号/资产名", None, QtGui.QApplication.UnicodeUTF8))
         self.fileName.setText(QtGui.QApplication.translate("Widget", "文件名", None, QtGui.QApplication.UnicodeUTF8))
+
+

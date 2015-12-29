@@ -4,7 +4,6 @@ from ui.publish_ui import Ui_Widget
 import os
 import maya.cmds as cmds
 import time
-import core.PIL as PIL
 
 class Widget(QtGui.QWidget, Ui_Widget):
     def __init__(self, parent=None):
@@ -133,7 +132,13 @@ class Widget(QtGui.QWidget, Ui_Widget):
             self.shotComboBox.insertItem(0,u"请先选择类型")
       
     def getThumbnails(self):
-        print dir(PIL.Image)
+           
+        self.originalPixmap = None
+        self.originalPixmap = QtGui.QPixmap.grabWindow(QtGui.QApplication.desktop().winId())
+        print dir(self.originalPixmap)
+        Layout = QtGui.QVBoxLayout()
+        Layout.addWidget()
+        self.imageBox.setLayout(Layout)
 
           
     

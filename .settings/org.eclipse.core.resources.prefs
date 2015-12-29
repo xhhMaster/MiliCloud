@@ -12,6 +12,7 @@ encoding//setup/setuppublish.py=utf-8
 encoding//setup/setupselectproject.py=utf-8
 encoding//setup/setupselectworkfiles.py=utf-8
 encoding//test/testasset.py=utf-8
+encoding//test/testdemo.py=utf-8
 encoding//test/testproject.py=utf-8
 encoding//test/testpublish.py=utf-8
 encoding//test/testsetupselectproject.py=utf-8

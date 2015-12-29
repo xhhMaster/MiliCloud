@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import core.requests as requests
+import lib.requests as requests
 
 class Task(object):
     

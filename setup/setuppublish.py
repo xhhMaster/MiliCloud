@@ -4,6 +4,7 @@ from ui.publish_ui import Ui_Widget
 import os
 import maya.cmds as cmds
 import time
+import ctypes 
 
 class Widget(QtGui.QWidget, Ui_Widget):
     def __init__(self, parent=None):
@@ -132,14 +133,24 @@ class Widget(QtGui.QWidget, Ui_Widget):
             self.shotComboBox.insertItem(0,u"请先选择类型")
       
     def getThumbnails(self):
-           
-        self.originalPixmap = None
-        self.originalPixmap = QtGui.QPixmap.grabWindow(QtGui.QApplication.desktop().winId())
-        print dir(self.originalPixmap)
-        Layout = QtGui.QVBoxLayout()
-        Layout.addWidget()
-        self.imageBox.setLayout(Layout)
-
+        try:  
+            #加载QQ抓图使用的dll  
+            print os.path.dirname(__file__)
+            dll_handle = ctypes.cdll.LoadLibrary('Camera.dll')   
+        except Exception:  
+            try:  
+                #如果dll加载失败，则换种方法使用，直接运行，如果还失败，退出  
+                os.system("Rundll32.exe Camera.dll, CameraSubArea")  
+            except Exception:  
+                pass     
+        else:  
+            try:  
+                #加载dll成功，则调用抓图函数，注:没有分析清楚这个函数带的参数个数  
+                #及类型，所以此语句执行后会报参数缺少4个字节，但不影响抓图功能，所  
+                #以直接忽略了些异常  
+                dll_handle.CameraSubArea(0)  
+            except Exception:  
+                pass             
           
     
     def __initTableWidget(self):

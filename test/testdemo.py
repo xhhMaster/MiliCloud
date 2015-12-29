@@ -13,7 +13,6 @@ def capture_choose_windows():
     '''       
     try:  
         #加载QQ抓图使用的dll  
-        
         dll_handle = ctypes.cdll.LoadLibrary('CameraDll.dll')   
     except Exception:  
             try:  

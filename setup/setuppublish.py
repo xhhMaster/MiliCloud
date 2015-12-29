@@ -4,12 +4,13 @@ from ui.publish_ui import Ui_Widget
 import os
 import maya.cmds as cmds
 import time
+import ctypes
 
 class Widget(QtGui.QWidget, Ui_Widget):
     def __init__(self, parent=None):
         super(Widget,self).__init__(parent)
         self.setupUi(self)
-        self.getThumbnails()
+        self.__ImageBox()
         self.bindingProjectComboBox()
         self.bindingTypeComboBox()
         self.bindingShotComboBox()
@@ -144,7 +145,7 @@ class Widget(QtGui.QWidget, Ui_Widget):
             QtCore.Qt.SmoothTransformation))
         Layout = QtGui.QVBoxLayout()
         Layout.addWidget(screenshotLabel)
-        self.imageBox.setLayout(Layout)
+      
     
     def __initTableWidget(self):
         header = ['ID','Name']
@@ -183,4 +184,24 @@ class Widget(QtGui.QWidget, Ui_Widget):
         warning = QtGui.QMessageBox()
         okBtn = warning.addButton(u'确定',QtGui.QMessageBox.AcceptRole)
         okBtn.clicked.connect(warning.close)
-        return warning
+        return warning    
+    
+    def __ImageBox(self):
+        self.imageBtn = QtGui.QPushButton()
+        self.imageBtn.setMaximumSize(550,160)
+        self.imageBtn.setMinimumSize(550,160)
+        self.imageBtn.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+        self.imageBtn.clicked.connect(lambda *args: [self.imageBtnClicked()])
+        Layout = QtGui.QVBoxLayout()
+        Layout.addWidget(self.imageBtn)
+        self.imageBox.setLayout(Layout)
+        
+    def imageBtnClicked(self):
+        path = os.path.dirname(__file__) + '\\CameraDll.dll'
+        print path
+        #s = os.system("Rundll32.exe CameraDll.dll, CameraSubArea")
+       
+        
+    def save_pic(self,pic, filename = '未命令图片.png'):  
+        return ''
+        

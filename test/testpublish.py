@@ -2,7 +2,6 @@
 import unittest
 from setup.setuppublish import Widget
 
-
 import sys
 from PySide import QtGui
 

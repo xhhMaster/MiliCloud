@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-
-from PySide import QtGui
+from PySide import QtGui,QtCore
 from ui.publish_ui import Ui_Widget
 import os
 import maya.cmds as cmds
 import time
-import ctypes 
-from mhlib import PATH
 
 class Widget(QtGui.QWidget, Ui_Widget):
     def __init__(self, parent=None):
         super(Widget,self).__init__(parent)
         self.setupUi(self)
+        self.getThumbnails()
         self.bindingProjectComboBox()
         self.bindingTypeComboBox()
         self.bindingShotComboBox()
@@ -23,8 +22,8 @@ class Widget(QtGui.QWidget, Ui_Widget):
         self.cancelBtn.clicked.connect(self.cancelBtnClicked)
   
     def cancelBtnClicked(self):
-        #self.close()
-        self.getThumbnails()
+        self.close()
+      
 
     def save(self):
         self.path = 'D:\\Sence\\'
@@ -134,26 +133,18 @@ class Widget(QtGui.QWidget, Ui_Widget):
             self.shotComboBox.insertItem(0,u"请先选择类型")
       
     def getThumbnails(self):
-        try:  
-            #加载QQ抓图使用的dll  
-            path =  os.path.dirname(__file__)+'\\Camera.dll'
-            print path
-            dll_handle = ctypes.cdll.LoadLibrary(path)   
-        except Exception:  
-            try:  
-                #如果dll加载失败，则换种方法使用，直接运行，如果还失败，退出  
-                os.system("Rundll32.exe Camera.dll, CameraSubArea")  
-            except Exception:  
-                pass     
-        else:  
-            try:  
-                #加载dll成功，则调用抓图函数，注:没有分析清楚这个函数带的参数个数  
-                #及类型，所以此语句执行后会报参数缺少4个字节，但不影响抓图功能，所  
-                #以直接忽略了些异常  
-                dll_handle.CameraSubArea(0)  
-            except Exception:  
-                pass             
-          
+        screenshotLabel = QtGui.QLabel()
+        screenshotLabel.setSizePolicy(QtGui.QSizePolicy.Expanding,
+                QtGui.QSizePolicy.Expanding)
+        screenshotLabel.setAlignment(QtCore.Qt.AlignCenter)
+        screenshotLabel.setMinimumSize(550, 160)
+        originalPixmap = QtGui.QPixmap.grabWindow(QtGui.QApplication.desktop().winId())
+        screenshotLabel.setPixmap(originalPixmap.scaled(
+            screenshotLabel.size(), QtCore.Qt.KeepAspectRatio,
+            QtCore.Qt.SmoothTransformation))
+        Layout = QtGui.QVBoxLayout()
+        Layout.addWidget(screenshotLabel)
+        self.imageBox.setLayout(Layout)
     
     def __initTableWidget(self):
         header = ['ID','Name']

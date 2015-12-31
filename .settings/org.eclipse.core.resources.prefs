@@ -1,5 +1,5 @@
 eclipse.preferences.version=1
-encoding//core/requests/adapters.py=utf-8
+encoding//lib/requests/adapters.py=utf-8
 encoding//mili/install.py=utf-8
 encoding//mili/menu.py=utf-8
 encoding//service/assetservice.py=utf-8
@@ -14,7 +14,7 @@ encoding//setup/setupselectworkfiles.py=utf-8
 encoding//test/testasset.py=utf-8
 encoding//test/testdemo.py=utf-8
 encoding//test/testproject.py=utf-8
-encoding//test/testpublish.py=utf-8
+encoding//test/testpublish.py=gb2312
 encoding//test/testsetupselectproject.py=utf-8
 encoding//test/testseupselectworkfiles.py=utf-8
 encoding//test/testshot.py=utf-8

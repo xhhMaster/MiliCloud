@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*-
+
+#coding=gb2312
 import unittest
 from setup.setuppublish import Widget
 

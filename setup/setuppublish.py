@@ -4,13 +4,16 @@ from ui.publish_ui import Ui_Widget
 import os
 import maya.cmds as cmds
 import time
-import ctypes
 
 class Widget(QtGui.QWidget, Ui_Widget):
     def __init__(self, parent=None):
         super(Widget,self).__init__(parent)
         self.setupUi(self)
+        
+        self.s =  QtGui.QWidget()
+        
         self.__ImageBox()
+        
         self.bindingProjectComboBox()
         self.bindingTypeComboBox()
         self.bindingShotComboBox()
@@ -25,7 +28,6 @@ class Widget(QtGui.QWidget, Ui_Widget):
     def cancelBtnClicked(self):
         self.close()
       
-
     def save(self):
         self.path = 'D:\\Sence\\'
         #获取当前日期
@@ -133,20 +135,6 @@ class Widget(QtGui.QWidget, Ui_Widget):
         else:
             self.shotComboBox.insertItem(0,u"请先选择类型")
       
-    def getThumbnails(self):
-        screenshotLabel = QtGui.QLabel()
-        screenshotLabel.setSizePolicy(QtGui.QSizePolicy.Expanding,
-                QtGui.QSizePolicy.Expanding)
-        screenshotLabel.setAlignment(QtCore.Qt.AlignCenter)
-        screenshotLabel.setMinimumSize(550, 160)
-        originalPixmap = QtGui.QPixmap.grabWindow(QtGui.QApplication.desktop().winId())
-        screenshotLabel.setPixmap(originalPixmap.scaled(
-            screenshotLabel.size(), QtCore.Qt.KeepAspectRatio,
-            QtCore.Qt.SmoothTransformation))
-        Layout = QtGui.QVBoxLayout()
-        Layout.addWidget(screenshotLabel)
-      
-    
     def __initTableWidget(self):
         header = ['ID','Name']
         List = QtGui.QTableWidget()
@@ -188,20 +176,67 @@ class Widget(QtGui.QWidget, Ui_Widget):
     
     def __ImageBox(self):
         self.imageBtn = QtGui.QPushButton()
-        self.imageBtn.setMaximumSize(550,160)
-        self.imageBtn.setMinimumSize(550,160)
+        self.imageBtn.setMaximumSize(580,160)
+        self.imageBtn.setMinimumSize(580,160)
+        self.imageBtn.setIcon(QtGui.QIcon('../Image/camera'))
+        self.imageBtn.setIconSize(QtCore.QSize(580, 100))
         self.imageBtn.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
-        self.imageBtn.clicked.connect(lambda *args: [self.imageBtnClicked()])
+        self.imageBtn.clicked.connect(self.grapWindowScreen)
         Layout = QtGui.QVBoxLayout()
         Layout.addWidget(self.imageBtn)
         self.imageBox.setLayout(Layout)
+         
+    def grapWindowScreen(self):
+        self.fullScreenLabel = QtGui.QLabel()
+        fullScreenPixmap = QtGui.QPixmap.grabWindow(QtGui.QApplication.desktop().winId())
+        self.fullScreenLabel.setPixmap(fullScreenPixmap)
+        myCursor = QtGui.QCursor(QtGui.QPixmap('../Image/pointer.png'),-1,-1);
+        self.fullScreenLabel.setCursor(myCursor)
+        self.fullScreenLabel.showFullScreen()
+        self.fullScreenLabel.mousePressEvent = lambda event: self.screenShotPressEvent(event)
+        self.fullScreenLabel.mouseMoveEvent = lambda event: self.screenShotMoveEvent(event)
+        self.fullScreenLabel.mouseReleaseEvent = lambda event: self.screenShotReleaseEvent(event)
+             
+    def screenShotPressEvent(self,event):
+        #True 鼠标左键按下且按键还未弹起
+        if event.button() == QtCore.Qt.LeftButton and event.type() == QtCore.QEvent.MouseButtonPress:
+            #鼠标左键标志位按下
+            self.leftMousePress = True
+            #获取鼠标点
+            self.origin = event.pos()
+            self.rubberBand = QtGui.QRubberBand(QtGui.QRubberBand.Rectangle,self.fullScreenLabel)
+            self.rubberBand.setGeometry(QtCore.QRect(self.origin,QtCore.QSize()))
+            self.rubberBand.show()
+            return True
         
-    def imageBtnClicked(self):
-        path = os.path.dirname(__file__) + '\\CameraDll.dll'
-        print path
-        #s = os.system("Rundll32.exe CameraDll.dll, CameraSubArea")
-       
+    def screenShotMoveEvent(self,event):
+        #True 鼠标左键按下并拖动
+        if event.type() == QtCore.QEvent.MouseMove and self.leftMousePress:
+            self.rubberBand.setGeometry(QtCore.QRect(self.origin,event.pos()).normalized())
+            return True
         
-    def save_pic(self,pic, filename = '未命令图片.png'):  
-        return ''
-        
+    def screenShotReleaseEvent(self,event):
+        #鼠标左键松开
+        if event.button() == QtCore.Qt.LeftButton and event.type() == QtCore.QEvent.MouseButtonRelease:
+            #鼠标标志位弹起
+            self.leftMousePress = False  
+             
+            #获取橡皮筋框的终止坐标
+            termination = event.pos()
+            rect = QtCore.QRect(self.origin,termination)
+            
+            #根据橡皮筋框截取全屏上的信息，并将其放入shotScreenLabel
+            self.shotScreenLabel = QtGui.QLabel()
+            pixmap = QtGui.QPixmap.grabWidget(self.fullScreenLabel,rect.x(),rect.y(),rect.width(),rect.height())
+            #self.shotScreenLabel.setPixmap(pixmap)
+            
+            pixmap.save('d:\\123\\100.png')
+            self.imageBtn.setIcon(pixmap)
+            self.imageBtn.setIconSize(QtCore.QSize(rect.width()/3, rect.height()/3))
+            #将shotScreenLabel的用户区大小固定为所截图片大小
+            #self.shotScreenLabel.setFixedSize(rect.width(), rect.height())
+           
+            self.rubberBand.hide()
+            self.fullScreenLabel.hide()
+          
+            return True       

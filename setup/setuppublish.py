@@ -4,6 +4,7 @@ from ui.publish_ui import Ui_Widget
 import os
 import maya.cmds as cmds
 import time
+import sys
 
 class Widget(QtGui.QWidget, Ui_Widget):
     def __init__(self, parent=None):
@@ -26,20 +27,15 @@ class Widget(QtGui.QWidget, Ui_Widget):
         self.cancelBtn.clicked.connect(self.cancelBtnClicked)
   
     def cancelBtnClicked(self):
-        self.close()
+        self.save()
+        #self.close()
         
-      
     def save(self):
-        self.path = 'D:\\Sence\\'
-        File = self.customFileName()
-        if File['projectName'] !=  u'暂无项目请先创建' and File['name'] != '' and File['content'] != u'没有可选的镜头或者资产,请先去创建':
-            self.path = self.path + File['createDate'] + '\\' + File['projectName'] + '\\' + File['ptype'] + '\\' + File['content']
-            self.subPath =  File['createDate'] + '\\' + File['projectName'] + '\\' + File['ptype'] + '\\' + File['content']
-            self.fullpath ='D:\\123' +'\\' + File['name'] + '.mb'
+        if self.__preSaveCheck():
             #判断目录是否存在
-            resultDir = os.path.exists('D:\\123')
+            resultDir = os.path.exists(self.path)
             if not resultDir:
-                os.makedirs('D:\\123')
+                os.makedirs(self.path)
                 
             #判断文件是否存在
             resultFile = os.path.exists(self.fullpath)
@@ -60,17 +56,7 @@ class Widget(QtGui.QWidget, Ui_Widget):
                 self.warning.show()
                 return True
         else:
-            self.warning.setWindowTitle(u'警告信息')
-            self.warning.setIcon(QtGui.QMessageBox.Critical)
-            self.warning.setText(u"  发布失败！                                                                                ")
-            if File['projectName'] ==  u'暂无项目请先创建':
-                self.warning.setInformativeText(u"  请选择项目名！")
-            elif File['content'] == u'没有可选的镜头或者资产,请先去创建':
-                self.warning.setInformativeText(u"  请选择所属类型！")
-            else:
-                self.warning.setInformativeText(u"  文件名为空，请输入文件名！")
-            self.warning.show()
-            return False
+            return False    
         
     def publishClicked(self):
         if self.save():
@@ -166,10 +152,13 @@ class Widget(QtGui.QWidget, Ui_Widget):
         return warning    
     
     def __ImageBox(self):
+        imagePath = os.path.abspath('camera.pn')
+        #imagePath = imagePath +'/Image/camera.pn'
+        print imagePath
         self.imageBtn = QtGui.QPushButton()
         self.imageBtn.setMaximumSize(580,160)
         self.imageBtn.setMinimumSize(580,160)
-        self.imageBtn.setIcon(QtGui.QIcon('../Image/camera'))
+        self.imageBtn.setIcon(QtGui.QIcon(imagePath))
         self.imageBtn.setIconSize(QtCore.QSize(580, 100))
         self.imageBtn.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         self.imageBtn.clicked.connect(self.grapWindowScreen)
@@ -178,10 +167,12 @@ class Widget(QtGui.QWidget, Ui_Widget):
         self.imageBox.setLayout(Layout)
          
     def grapWindowScreen(self):
+        imagePath = self.__getPath()
+        imagePath = imagePath +'/Image/pointer.png'
         self.fullScreenLabel = QtGui.QLabel()
         fullScreenPixmap = QtGui.QPixmap.grabWindow(QtGui.QApplication.desktop().winId())
         self.fullScreenLabel.setPixmap(fullScreenPixmap)
-        myCursor = QtGui.QCursor(QtGui.QPixmap('../Image/pointer.png'),-1,-1);
+        myCursor = QtGui.QCursor(QtGui.QPixmap(imagePath),-1,-1);
         self.fullScreenLabel.setCursor(myCursor)
         self.fullScreenLabel.showFullScreen()
         self.fullScreenLabel.mousePressEvent = lambda event: self.screenShotPressEvent(event)
@@ -220,7 +211,7 @@ class Widget(QtGui.QWidget, Ui_Widget):
             self.shotScreenLabel = QtGui.QLabel()
             pixmap = QtGui.QPixmap.grabWidget(self.fullScreenLabel,rect.x(),rect.y(),rect.width(),rect.height())
             #self.shotScreenLabel.setPixmap(pixmap)
-            path = self.__getSavePath()
+            path = self.__getImageSavePath()
             pixmap.save(path + '.png')
             self.imageBtn.setIcon(pixmap)
             self.imageBtn.setIconSize(QtCore.QSize(rect.width()/3, rect.height()/3))
@@ -232,7 +223,7 @@ class Widget(QtGui.QWidget, Ui_Widget):
           
             return True       
     
-    def customFileName(self):
+    def __customSaveFileName(self):
         fileName = {}
         fileName['createDate'] = time.strftime('%Y-%m-%d',time.localtime(time.time()))
         #项目名称
@@ -246,8 +237,8 @@ class Widget(QtGui.QWidget, Ui_Widget):
         
         return fileName
         
-    def __getSavePath(self):  
-        FileInfo = self.customFileName()
+    def __getImageSavePath(self):
+        FileInfo = self.__customSaveFileName()
         savePath = ('D:\\Image\\' + FileInfo['createDate'] + '\\'
                      + FileInfo['projectName'] + '\\' + FileInfo['ptype'] 
                      + '\\' + FileInfo['content']
@@ -255,8 +246,41 @@ class Widget(QtGui.QWidget, Ui_Widget):
         resultDir = os.path.exists(savePath)
         if not resultDir:
             os.makedirs(savePath)
-            
+        
         savePath = savePath + '\\' + FileInfo['name']
         return savePath
       
+    def __preSaveCheck(self):
+        self.path = 'D:\\Sence\\'
+        File = self.__customSaveFileName()
+        if File['projectName'] !=  u'暂无项目请先创建' and File['name'] != '' and File['content'] != u'没有可选的镜头或者资产,请先去创建':
+            self.path = (self.path + File['createDate'] + '\\' 
+                         + File['projectName'] + '\\' 
+                         + File['ptype'] + '\\' + File['content']
+                        )
+            
+            self.subPath = (File['createDate'] + '\\' + File['projectName'] 
+                            + '\\' + File['ptype'] + '\\' 
+                            + File['content']
+                        )
+            
+            self.fullpath = self.path +'\\' + File['name'] + '.mb'
+            return True
+        else:
+            self.warning.setWindowTitle(u'警告信息')
+            self.warning.setIcon(QtGui.QMessageBox.Critical)
+            self.warning.setText(u"  发布失败！                                                                                ")
+            if File['projectName'] ==  u'暂无项目请先创建':
+                self.warning.setInformativeText(u"  请选择项目名！")
+            elif File['content'] == u'没有可选的镜头或者资产,请先去创建':
+                self.warning.setInformativeText(u"  请选择镜头或者资产名！")
+            else:
+                self.warning.setInformativeText(u"  文件名为空，请输入文件名！")
+            self.warning.show()
+            return False
+ 
+    def __getPath(self):
+        p = os.path.dirname(os.getcwd())
+        p = p.replace('\\','/')
+        return p
             

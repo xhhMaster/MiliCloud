@@ -13,7 +13,7 @@ class Ui_Widget(object):
         self.contentBox = QtGui.QGroupBox(Widget)
         self.contentBox.setGeometry(QtCore.QRect(20, 360, 601, 141))
         self.contentBox.setObjectName("contentBox")
-        self.contentTxt = QtGui.QTextBrowser(self.contentBox)
+        self.contentTxt = QtGui.QTextEdit(self.contentBox)
         self.contentTxt.setGeometry(QtCore.QRect(10, 20, 581, 111))
         self.contentTxt.setObjectName("contentTxt")
         self.publishBtn = QtGui.QPushButton(Widget)

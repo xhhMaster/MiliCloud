@@ -8,10 +8,7 @@ import time
 class Widget(QtGui.QWidget, Ui_Widget):
     def __init__(self, parent=None):
         super(Widget,self).__init__(parent)
-        self.setupUi(self)
-        
-        self.s =  QtGui.QWidget()
-        
+        self.setupUi(self)       
         self.__ImageBox()
         self.savePath = None
         self.bindingProjectComboBox()

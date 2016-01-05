@@ -4,7 +4,6 @@ from ui.publish_ui import Ui_Widget
 import os
 import maya.cmds as cmds
 import time
-import sys
 
 class Widget(QtGui.QWidget, Ui_Widget):
     def __init__(self, parent=None):
@@ -14,7 +13,7 @@ class Widget(QtGui.QWidget, Ui_Widget):
         self.s =  QtGui.QWidget()
         
         self.__ImageBox()
-        
+        self.savePath = None
         self.bindingProjectComboBox()
         self.bindingTypeComboBox()
         self.bindingShotComboBox()
@@ -27,33 +26,30 @@ class Widget(QtGui.QWidget, Ui_Widget):
         self.cancelBtn.clicked.connect(self.cancelBtnClicked)
   
     def cancelBtnClicked(self):
-        self.save()
-        #self.close()
+        self.close()
         
     def save(self):
         if self.__preSaveCheck():
-            #判断目录是否存在
-            resultDir = os.path.exists(self.path)
-            if not resultDir:
-                os.makedirs(self.path)
-                
             #判断文件是否存在
             resultFile = os.path.exists(self.fullpath)
+            remark = self.contentTxt.toPlainText()
+            
+            if self.savePath == None:
+                msg = u'请添加缩略图'
+                self.showWarningDialog(msg)
+                return False
             if resultFile:
-                self.warning.setWindowTitle(u'警告信息')
-                self.warning.setIcon(QtGui.QMessageBox.Critical)
-                self.warning.setText(u"  发布失败！                                                                    ")
-                self.warning.setInformativeText(u"  当前文件名已经存在，请更改！")
-                self.warning.show()
+                msg = u'当前文件名已经存在，请更改!'
+                self.showWarningDialog(msg)
+                return False
+            if remark == '':
+                msg = u'请添加备注信息!'
+                self.showWarningDialog(msg)
                 return False
             else:   
                 cmds.file(rename = self.fullpath)
                 cmds.file(save =1,type='mayaBinary')
-                self.warning.setIcon(QtGui.QMessageBox.NoIcon)
-                self.warning.setWindowTitle(u'提示信息')
-                self.warning.setText(u"  发布成功！                                                                                     ")
-                self.warning.setInformativeText('')
-                self.warning.show()
+                self.showSucessDialog()
                 return True
         else:
             return False    
@@ -62,7 +58,11 @@ class Widget(QtGui.QWidget, Ui_Widget):
         if self.save():
             import service.publishservice as publishservice
             publishservice.Publish().callService(self.fullpath,self.subPath)
+    
+    def insertDataBase(self):
         
+        return True
+           
     #绑定项目名
     def bindingProjectComboBox(self):
         self.projectComboBox.setMinimumWidth(500)
@@ -152,13 +152,10 @@ class Widget(QtGui.QWidget, Ui_Widget):
         return warning    
     
     def __ImageBox(self):
-        imagePath = os.path.abspath('camera.pn')
-        #imagePath = imagePath +'/Image/camera.pn'
-        print imagePath
         self.imageBtn = QtGui.QPushButton()
         self.imageBtn.setMaximumSize(580,160)
         self.imageBtn.setMinimumSize(580,160)
-        self.imageBtn.setIcon(QtGui.QIcon(imagePath))
+        self.imageBtn.setIcon(QtGui.QIcon('../Image/camera.png'))
         self.imageBtn.setIconSize(QtCore.QSize(580, 100))
         self.imageBtn.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         self.imageBtn.clicked.connect(self.grapWindowScreen)
@@ -167,12 +164,10 @@ class Widget(QtGui.QWidget, Ui_Widget):
         self.imageBox.setLayout(Layout)
          
     def grapWindowScreen(self):
-        imagePath = self.__getPath()
-        imagePath = imagePath +'/Image/pointer.png'
         self.fullScreenLabel = QtGui.QLabel()
         fullScreenPixmap = QtGui.QPixmap.grabWindow(QtGui.QApplication.desktop().winId())
         self.fullScreenLabel.setPixmap(fullScreenPixmap)
-        myCursor = QtGui.QCursor(QtGui.QPixmap(imagePath),-1,-1);
+        myCursor = QtGui.QCursor(QtGui.QPixmap('../Image/pointer.png'),-1,-1);
         self.fullScreenLabel.setCursor(myCursor)
         self.fullScreenLabel.showFullScreen()
         self.fullScreenLabel.mousePressEvent = lambda event: self.screenShotPressEvent(event)
@@ -239,16 +234,18 @@ class Widget(QtGui.QWidget, Ui_Widget):
         
     def __getImageSavePath(self):
         FileInfo = self.__customSaveFileName()
-        savePath = ('D:\\Image\\' + FileInfo['createDate'] + '\\'
+        self.savePath = ('D:\\Image\\' + FileInfo['createDate'] + '\\'
                      + FileInfo['projectName'] + '\\' + FileInfo['ptype'] 
                      + '\\' + FileInfo['content']
                      )
-        resultDir = os.path.exists(savePath)
+        resultDir = os.path.exists(self.savePath)
         if not resultDir:
-            os.makedirs(savePath)
-        
-        savePath = savePath + '\\' + FileInfo['name']
-        return savePath
+            os.makedirs(self.savePath)
+        if FileInfo['name'] != '' :
+            self.savePath = self.savePath + '\\' + FileInfo['name']
+        else:
+            self.savePath =  self.savePath + '\\default'  
+        return self.savePath
       
     def __preSaveCheck(self):
         self.path = 'D:\\Sence\\'
@@ -265,6 +262,11 @@ class Widget(QtGui.QWidget, Ui_Widget):
                         )
             
             self.fullpath = self.path +'\\' + File['name'] + '.mb'
+            
+            resultDir = os.path.exists(self.path)
+            
+            if not resultDir:
+                os.makedirs(self.path)
             return True
         else:
             self.warning.setWindowTitle(u'警告信息')
@@ -277,10 +279,18 @@ class Widget(QtGui.QWidget, Ui_Widget):
             else:
                 self.warning.setInformativeText(u"  文件名为空，请输入文件名！")
             self.warning.show()
-            return False
- 
-    def __getPath(self):
-        p = os.path.dirname(os.getcwd())
-        p = p.replace('\\','/')
-        return p
-            
+            return False    
+        
+    def showWarningDialog(self,txt):
+        self.warning.setWindowTitle(u'警告信息')
+        self.warning.setIcon(QtGui.QMessageBox.Critical)
+        self.warning.setText(u"  发布失败！                                                                    ")
+        self.warning.setInformativeText("  " + txt)
+        self.warning.show()
+        
+    def showSucessDialog(self):
+        self.warning.setIcon(QtGui.QMessageBox.NoIcon)
+        self.warning.setWindowTitle(u'提示信息')
+        self.warning.setText(u"  发布成功！                                                                                     ")
+        self.warning.setInformativeText('')
+        self.warning.show()

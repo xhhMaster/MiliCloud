@@ -8,7 +8,7 @@ import time
 class Widget(QtGui.QWidget, Ui_Widget):
     def __init__(self, parent=None):
         super(Widget,self).__init__(parent)
-        self.setupUi(self)       
+        self.setupUi(self)  
         self.__ImageBox()
         self.savePath = None
         self.bindingProjectComboBox()
@@ -24,7 +24,7 @@ class Widget(QtGui.QWidget, Ui_Widget):
   
     def cancelBtnClicked(self):
         self.close()
-        
+           
     def save(self):
         if self.__preSaveCheck():
             #判断文件是否存在
@@ -55,32 +55,34 @@ class Widget(QtGui.QWidget, Ui_Widget):
         if self.save():
             import service.publishservice as publishservice
             publishservice.Publish().callService(self.fullpath,self.subPath)
+            publishservice.Publish().callService(self.savePath,self.subPath)
+            self.insertDataBase()
     
     def insertDataBase(self):
+        data = {}
+        data['entity_type'] = self.typeComboBox.currentText()
+        data['entity_id'] = self.__getSelectedId(self.shotComboBox,self.List)
+        data['content'] = self.shotComboBox.currentText()
+        data['code'] = self.FileTxt.text() + '.mb'
+        data['image_id']= ''
+        data['description'] = self.contentTxt.toPlainText()
+        data['project_id'] = self.__getSelectedId(self.projectComboBox,self.projectList)
+        data['file_type'] = 'mb'
+        data['file_size'] = '100'
+        data['user_id'] = '100'
+        data['created_by_id'] = '100'
+        data['updated_by_id'] = ''
+        import service.insertdbservice as insertdbservice
+        insertdbservice.InsertVersionDB().callService(data)
         
-        return True
-           
     #绑定项目名
     def bindingProjectComboBox(self):
         self.projectComboBox.setMinimumWidth(500)
-        import service.projectservice as projectservice
-        contents = projectservice.Project().callService()
+        data = self.getProjectInfo()
         self.projectList = self.__initTableWidget()
-        if len(contents) > 0:
-            for index,content in enumerate(contents):
-                self.projectList.insertRow(index)    
-                itemId = QtGui.QTableWidgetItem(content['id'])
-                itemName = QtGui.QTableWidgetItem(content['name'])
-                self.projectList.setItem(index,0,itemId)
-                self.projectList.setItem(index,1,itemName)
-            self.projectList.setColumnHidden(0,True)
-            self.projectComboBox.setModel(self.projectList.model())
-            self.projectComboBox.setModelColumn(1)
-            self.projectComboBox.setView(self.projectList)
-            
-        else:
-            self.projectComboBox.addItem(u"暂无项目请先创建")
-           
+        txt = u"暂无项目请先创建"
+        self.__addItemInComboBox(data,self.projectList,self.projectComboBox,txt)
+    
     #绑定类型名    
     def bindingTypeComboBox(self):
         self.typeComboBox.setMinimumWidth(500)
@@ -96,18 +98,14 @@ class Widget(QtGui.QWidget, Ui_Widget):
     def bindingShotComboBox(self):
         self.shotComboBox.setMinimumWidth(500)
         self.shotComboBox.clear()
-        ptype = self.typeComboBox.currentText()
-        pid = self.__getSelectedProjectId()
-        if ptype == 'Shot':
-            import service.shotservice as shotservice
-            shotContents = shotservice.Shot().callService(pid)
-            self.__addItemInShotComboBox(shotContents)
-        elif ptype == 'Asset':
-            import service.assetservice as assetservice
-            assetContents = assetservice.Asset().callService(pid)
-            self.__addItemInShotComboBox(assetContents)
+        self.List = self.__initTableWidget()
+        data = self.getSourceData()  
+        if data != -1: 
+            txt = u"没有可选的镜头或者资产,请先去创建"
+            self.__addItemInComboBox(data,self.List,self.shotComboBox,txt)
         else:
             self.shotComboBox.insertItem(0,u"请先选择类型")
+            return False
       
     def __initTableWidget(self):
         header = ['ID','Name']
@@ -123,30 +121,68 @@ class Widget(QtGui.QWidget, Ui_Widget):
         List.horizontalHeader().setStretchLastSection(True)
         return List
     
-    def __getSelectedProjectId(self):
-        #设置默认选中第一行
-        txt = self.projectComboBox.currentText()
-        if txt != u'暂无项目请先创建':
-            self.projectList.selectRow(self.projectComboBox.currentIndex())
-            selectedRow = self.projectList.currentIndex().row()
-            selectedId = self.projectList.item(selectedRow,0).text()
-        else:
-            selectedId = ''
-        return selectedId
-    
-    def __addItemInShotComboBox(self,sourceData):
-        if len(sourceData) > 0:
-            for index,content in enumerate(sourceData):
-                self.shotComboBox.insertItem(index,content['name'])
-        else:
-            self.shotComboBox.insertItem(0,u"没有可选的镜头或者资产,请先去创建")
-    
     #初始化提示框
+    
     def __initMessageBox(self):
         warning = QtGui.QMessageBox()
         okBtn = warning.addButton(u'确定',QtGui.QMessageBox.AcceptRole)
         okBtn.clicked.connect(warning.close)
         return warning    
+    
+    def __getSelectedId(self,comboBox,inputList):
+        #设置默认选中第一行
+        txt = comboBox.currentText()
+        if txt != u'暂无项目请先创建':
+            selectedRow = comboBox.currentIndex()
+            selectedId = inputList.item(selectedRow,0).text()
+        else:
+            selectedId = -1
+        return selectedId
+    
+    def __addItemInComboBox(self,sourceData,ouputList,comboBox,txt):
+        if len(sourceData) > 0:
+            self.__bindingComboxBox(sourceData,ouputList,comboBox)     
+        else:
+            comboBox.insertItem(0,txt)
+    
+    def __bindingComboxBox(self,sourceData,outputList,comboBox):
+        for index,content in enumerate(sourceData):
+            outputList.insertRow(index)    
+            itemId = QtGui.QTableWidgetItem(content['id'])
+            itemName = QtGui.QTableWidgetItem(content['name'])
+            outputList.setItem(index,0,itemId)
+            outputList.setItem(index,1,itemName)
+            outputList.setColumnHidden(0,True)
+            comboBox.setModel(outputList.model())
+        comboBox.setModelColumn(1)
+        comboBox.setView(outputList)  
+             
+    def getProjectInfo(self):
+        import service.projectservice as projectservice
+        data = projectservice.Project().callService()
+        return data
+        
+    def getShotInfo(self,pid):
+        import service.shotservice as shotservice
+        shotContents = shotservice.Shot().callService(pid)
+        return shotContents
+    
+    def getAssetInfo(self,pid):
+        import service.assetservice as assetservice
+        assetContents = assetservice.Asset().callService(pid)
+        return assetContents
+    
+    def getSourceData(self):
+        ptype = self.typeComboBox.currentText()
+        pid = self.__getSelectedId(self.projectComboBox,self.projectList)
+        data = ''
+        if ptype == 'Shot':
+            data = self.getShotInfo(pid)
+        if ptype == 'Asset':
+            data = self.getAssetInfo(pid)
+        if ptype != 'Shot' and ptype != 'Asset':
+            data = -1
+        return data
     
     def __ImageBox(self):
         self.imageBtn = QtGui.QPushButton()
@@ -159,7 +195,7 @@ class Widget(QtGui.QWidget, Ui_Widget):
         Layout = QtGui.QVBoxLayout()
         Layout.addWidget(self.imageBtn)
         self.imageBox.setLayout(Layout)
-         
+        
     def grapWindowScreen(self):
         self.fullScreenLabel = QtGui.QLabel()
         fullScreenPixmap = QtGui.QPixmap.grabWindow(QtGui.QApplication.desktop().winId())
@@ -170,7 +206,7 @@ class Widget(QtGui.QWidget, Ui_Widget):
         self.fullScreenLabel.mousePressEvent = lambda event: self.screenShotPressEvent(event)
         self.fullScreenLabel.mouseMoveEvent = lambda event: self.screenShotMoveEvent(event)
         self.fullScreenLabel.mouseReleaseEvent = lambda event: self.screenShotReleaseEvent(event)
-             
+        
     def screenShotPressEvent(self,event):
         #True 鼠标左键按下且按键还未弹起
         if event.button() == QtCore.Qt.LeftButton and event.type() == QtCore.QEvent.MouseButtonPress:
@@ -258,7 +294,7 @@ class Widget(QtGui.QWidget, Ui_Widget):
                             + File['content']
                         )
             
-            self.fullpath = self.path +'\\' + File['name'] + '.mb'
+            self.fullpath = 'D:\\123' +'\\' + File['name'] + '.mb'
             
             resultDir = os.path.exists(self.path)
             

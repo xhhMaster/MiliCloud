@@ -7,10 +7,10 @@ class Publish(object):
         self.url = 'http://192.168.150.233:4267/api/versionAdd/upload?f='
        
     def __upLoad(self,fileName,directory):
-            self.url = self.url + directory
-            files = {'file': open(fileName, 'rb')}
-            result = requests.post(self.url, files=files)
-            print result.text
+        self.url = self.url + directory
+        files = {'file': open(fileName, 'rb')}
+        result = requests.post(self.url, files=files)
+        print result.text
         
           
     def callService(self,fileName,directory):

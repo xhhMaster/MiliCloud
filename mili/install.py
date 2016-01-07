@@ -5,13 +5,11 @@ from mili.menu import MenuGenerator
     
 class MiliCloudToolsInstall(object):
     def __init__(self):
-        self.setup()
-        
+        self.windowName = u"米粒云安装界面"
+        cmds.scriptJob(event = ["NewSceneOpened",self.miliCloud])
       
-    
     #安装错误
     def install_Error(self):
-        self.windowName = u"米粒云安装界面"
         errorMsg = u"错误：找不到米粒云安装目录.\n\n请通过\'浏览\'按钮查找."   
         title = u"米粒云"
         cancelBtn = u"取消"
@@ -45,9 +43,10 @@ class MiliCloudToolsInstall(object):
     
     
     #浏览     
+    
     def install_Browse(self,*args):
         
-        self.windowName = u"米粒云安装界面"
+        #self.windowName = u"米粒云安装界面"
         warningMsg = u"选中的目录不是米粒云的目录.请重新选择！"
         
         miliCloudDir =  cmds.fileDialog2(dialogStyle = 2,fileMode = 3)[0]
@@ -70,11 +69,12 @@ class MiliCloudToolsInstall(object):
         
     
     #取消    
+    
     def install_Cancel(self,*args):  
-        self.windowName = u"米粒云安装界面"
         cmds.deleteUI(self.windowName) 
   
     #执行
+    
     def miliCloud(self):
         path = cmds.internalVar(upd = True) + "miliCloud.txt"       
       
@@ -91,5 +91,5 @@ class MiliCloudToolsInstall(object):
                 MenuGenerator()
         else:            
             self.install_Error()          
-    def setup(self):
-        cmds.scriptJob(event = ["NewSceneOpened",self.miliCloud])
+
+        

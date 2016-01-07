@@ -2,6 +2,8 @@
 from PySide import QtGui,QtCore
 from ui.selectworkfiles_ui import Ui_Widget
 import re
+import maya.cmds as cmds
+import os
 
 class Widget(QtGui.QWidget, Ui_Widget):
     
@@ -16,6 +18,7 @@ class Widget(QtGui.QWidget, Ui_Widget):
         self.searchShotList = self.__initTableWidget()
         self.mainLayout = QtGui.QVBoxLayout()
         self.setupUi(self)   
+        self.warning = self.__initMessageBox()
         self.projectNameEdit.setText(self.content)
         self.projectDescEdit.setText(self.desc)
         self.searchShots.textChanged.connect(self.__inputTxtChanged)
@@ -26,6 +29,7 @@ class Widget(QtGui.QWidget, Ui_Widget):
         self.assetList.clicked.connect(self.__bindingTaskForAsset)
         self.searchShotList.clicked.connect(self.__bindingTaskForSearchShot)
         self.searchAssetList.clicked.connect(self.__bindingTaskForSearchAsset)
+        self.selBtn.clicked.connect(self.openSelectedFile)
         self.createBtn.clicked.connect(self.createClicked)
         self.cancelBtn.clicked.connect(self.cancelClicked)
         
@@ -91,13 +95,13 @@ class Widget(QtGui.QWidget, Ui_Widget):
      
     def __getTaskData(self,entity_id,entity_type):
         #导入TaskService
-        import service.taskservice as taskservice
-        contents = taskservice.Task().callService(entity_id,entity_type)  
+        import service.workfilesservice as workfilesservice
+        contents = workfilesservice.Task().callService(entity_id,entity_type)  
         self.taskList = QtGui.QListWidget()    
         self.taskList.clear()
         if len(contents) > 0:
             for content in contents:        
-                QtGui.QListWidgetItem(content['content'],self.taskList)
+                QtGui.QListWidgetItem(content['code'],self.taskList)
             self.tasksScrollArea.setWidget(self.taskList)
         else:
             QtGui.QListWidgetItem(u'没有相关Task',self.taskList)
@@ -271,7 +275,7 @@ class Widget(QtGui.QWidget, Ui_Widget):
                 outputList.insertRow(index)    
                 itemId = QtGui.QTableWidgetItem(content['id'])
                 itemName = QtGui.QTableWidgetItem(content['name'])
-                itemType = QtGui.QTableWidgetItem('Shot')
+                itemType = QtGui.QTableWidgetItem(Flag)
                 outputList.setItem(index,0,itemId)
                 outputList.setItem(index,1,itemName)
                 outputList.setItem(index,2,itemType)
@@ -317,3 +321,31 @@ class Widget(QtGui.QWidget, Ui_Widget):
             self.__bindingTaskForSearchAsset()
         else:
             self.taskList = QtGui.QListWidget()
+    
+    def openSelectedFile(self):
+        fileName = self.taskList.currentIndex().data()
+        if fileName  != None: 
+            filePath = 'd:/mayaDownload/'
+            pathDir = os.path.exists(filePath)
+            if not pathDir:
+                os.makedirs(filePath)
+                
+            import service.downloadservice as downloadservice
+            downloadservice.DownLoad().callService(filePath+fileName,fileName)
+            cmds.file(filePath+fileName,f = 1,type='mayaBinary',o = 1) 
+        else:
+            txt = u'请选择工作文件！'
+            self.showWarningDialog(txt)
+    
+    def __initMessageBox(self):
+        warning = QtGui.QMessageBox()
+        okBtn = warning.addButton(u'确定',QtGui.QMessageBox.AcceptRole)
+        okBtn.clicked.connect(warning.close)
+        return warning 
+    
+    def showWarningDialog(self,txt):
+        self.warning.setWindowTitle(u'警告信息')
+        self.warning.setIcon(QtGui.QMessageBox.Critical)
+        self.warning.setText(u"  打开失败！                                                                    ")
+        self.warning.setInformativeText("  " + txt)
+        self.warning.show() 

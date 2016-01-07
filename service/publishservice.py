@@ -9,8 +9,7 @@ class Publish(object):
     def __upLoad(self,fileName,directory):
         self.url = self.url + directory
         files = {'file': open(fileName, 'rb')}
-        result = requests.post(self.url, files=files)
-        print result.text
+        requests.post(self.url, files=files)
         
           
     def callService(self,fileName,directory):

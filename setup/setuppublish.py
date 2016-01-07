@@ -5,6 +5,7 @@ import os
 import maya.cmds as cmds
 import time
 
+
 class Widget(QtGui.QWidget, Ui_Widget):
     def __init__(self, parent=None):
         super(Widget,self).__init__(parent)
@@ -24,7 +25,8 @@ class Widget(QtGui.QWidget, Ui_Widget):
   
     def cancelBtnClicked(self):
         self.close()
-           
+      
+        
     def save(self):
         if self.__preSaveCheck():
             #判断文件是否存在
@@ -54,9 +56,10 @@ class Widget(QtGui.QWidget, Ui_Widget):
     def publishClicked(self):
         if self.save():
             import service.publishservice as publishservice
-            publishservice.Publish().callService(self.fullpath,self.subPath)
-            publishservice.Publish().callService(self.savePath,self.subPath)
+            publishservice.Publish().callService(self.fullpath,'')
+            publishservice.Publish().callService(self.savePath,self.saveSubPath)
             self.insertDataBase()
+            self.insertImgDB()
     
     def insertDataBase(self):
         data = {}
@@ -74,6 +77,14 @@ class Widget(QtGui.QWidget, Ui_Widget):
         data['updated_by_id'] = ''
         import service.insertdbservice as insertdbservice
         insertdbservice.InsertVersionDB().callService(data)
+        
+    def insertImgDB(self):
+        data = {}
+        data['the_file'] = self.FileTxt.text()+'.png'
+        data['mime_type'] = 'image/png'
+        data['file_type'] = 'png'
+        import service.insertimgservice as insertimgservice
+        insertimgservice.InsertImgDB().callService(data)
         
     #绑定项目名
     def bindingProjectComboBox(self):
@@ -240,7 +251,7 @@ class Widget(QtGui.QWidget, Ui_Widget):
             pixmap = QtGui.QPixmap.grabWidget(self.fullScreenLabel,rect.x(),rect.y(),rect.width(),rect.height())
             #self.shotScreenLabel.setPixmap(pixmap)
             path = self.__getImageSavePath()
-            pixmap.save(path + '.png')
+            pixmap.save(path)
             self.imageBtn.setIcon(pixmap)
             self.imageBtn.setIconSize(QtCore.QSize(rect.width()/3, rect.height()/3))
             #将shotScreenLabel的用户区大小固定为所截图片大小
@@ -267,34 +278,40 @@ class Widget(QtGui.QWidget, Ui_Widget):
         
     def __getImageSavePath(self):
         FileInfo = self.__customSaveFileName()
-        self.savePath = ('D:\\Image\\' + FileInfo['createDate'] + '\\'
-                     + FileInfo['projectName'] + '\\' + FileInfo['ptype'] 
-                     + '\\' + FileInfo['content']
+        self.savePath = ('D:/Image/' + FileInfo['createDate'] + '/'
+                     + FileInfo['projectName'] + '/' + FileInfo['ptype'] 
+                     + '/' + FileInfo['content']
                      )
+        
+        self.saveSubPath = ('Image/' + FileInfo['createDate'] + '/'
+                     + FileInfo['projectName'] + '/' + FileInfo['ptype'] 
+                     + '/' + FileInfo['content']
+                     )
+        
         resultDir = os.path.exists(self.savePath)
         if not resultDir:
             os.makedirs(self.savePath)
         if FileInfo['name'] != '' :
-            self.savePath = self.savePath + '\\' + FileInfo['name']
+            self.savePath = self.savePath + '/' + FileInfo['name'] + '.png'
         else:
-            self.savePath =  self.savePath + '\\default'  
+            self.savePath =  self.savePath + '/default.png'  
         return self.savePath
       
     def __preSaveCheck(self):
-        self.path = 'D:\\Sence\\'
+        self.path = 'D:/Sence/'
         File = self.__customSaveFileName()
         if File['projectName'] !=  u'暂无项目请先创建' and File['name'] != '' and File['content'] != u'没有可选的镜头或者资产,请先去创建':
-            self.path = (self.path + File['createDate'] + '\\' 
-                         + File['projectName'] + '\\' 
-                         + File['ptype'] + '\\' + File['content']
+            self.path = (self.path + File['createDate'] + '/' 
+                         + File['projectName'] + '/' 
+                         + File['ptype'] + '/' + File['content']
                         )
             
-            self.subPath = (File['createDate'] + '\\' + File['projectName'] 
-                            + '\\' + File['ptype'] + '\\' 
+            self.subPath = ('Sence/'+File['createDate'] + '/' + File['projectName'] 
+                            + '/' + File['ptype'] + '/' 
                             + File['content']
                         )
             
-            self.fullpath = 'D:\\123' +'\\' + File['name'] + '.mb'
+            self.fullpath = self.path +'/' + File['name']+ '.mb'
             
             resultDir = os.path.exists(self.path)
             

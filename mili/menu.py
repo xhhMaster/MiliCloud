@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import maya.cmds as cmds
-from maya import mel
-
+import pymel.core as pm
 
 class MenuGenerator(object):
      
@@ -19,11 +18,14 @@ class MenuGenerator(object):
         self.history = u"历史浏览"
         self.settingLauguage = u"切换英文菜单"
         self.flag = True
-        self.createMenu()
+        if cmds.window(self.mainMenuName,exists=True):
+            cmds.deleteUI(self.windowName)
+        else:
+            self.createMenu()
         
     def createMenu(self):
-        gMainWindow = mel.eval('$temp1 = $gMainWindow')   
-        self.mainMenu = cmds.menu(parent = gMainWindow,label = self.mainMenuName)
+        #gMainWindow = mel.eval('$temp1 = $gMainWindow')   
+        self.mainMenu = cmds.menu(parent = pm.melGlobals["gMainWindow"],label = self.mainMenuName)
                
         miliCloudFileManage = cmds.menuItem(parent = self.mainMenu,label = self.miliCloudFileManage,subMenu = True)
         fileManage = cmds.menuItem(parent = miliCloudFileManage,label = self.fileManage,c = self.showFileManageDlg)
@@ -42,7 +44,6 @@ class MenuGenerator(object):
         import ui.selectarea_ui as selectarea_ui
         selectarea_ui.SelectedWorkFiles_UI()
         
-    
     def publishDlg(self,*args):
         import setup.setuppublish as setuppublish
         reload(setuppublish)

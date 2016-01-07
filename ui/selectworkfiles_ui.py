@@ -71,14 +71,14 @@ class Ui_Widget(object):
 
     def retranslateUi(self, Widget):
         Widget.setWindowTitle(QtGui.QApplication.translate("Widget", "选择工作文件", None, QtGui.QApplication.UnicodeUTF8))
-        self.shotGB.setTitle(QtGui.QApplication.translate("Widget", "Shots&&Assets", None, QtGui.QApplication.UnicodeUTF8))
+        self.shotGB.setTitle(QtGui.QApplication.translate("Widget", "Select Work Area", None, QtGui.QApplication.UnicodeUTF8))
         self.projectNameEdit.setText(QtGui.QApplication.translate("Widget", "项目名字", None, QtGui.QApplication.UnicodeUTF8))
         self.projectDescEdit.setHtml(QtGui.QApplication.translate("Widget", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
 "</style></head><body style=\" font-family:\'SimSun\'; font-size:9pt; font-weight:400; font-style:normal;\">\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'微软雅黑\';\">项目描述</span></p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
-        self.tasksGB.setTitle(QtGui.QApplication.translate("Widget", "Tasks", None, QtGui.QApplication.UnicodeUTF8))
+        self.tasksGB.setTitle(QtGui.QApplication.translate("Widget", "Available Work Files", None, QtGui.QApplication.UnicodeUTF8))
         self.myTaskCK.setText(QtGui.QApplication.translate("Widget", "仅显示我的任务", None, QtGui.QApplication.UnicodeUTF8))
         self.createBtn.setText(QtGui.QApplication.translate("Widget", "新建", None, QtGui.QApplication.UnicodeUTF8))
         self.selBtn.setText(QtGui.QApplication.translate("Widget", "选择", None, QtGui.QApplication.UnicodeUTF8))

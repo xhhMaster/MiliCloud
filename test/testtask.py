@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import unittest
-from service.taskservice import Task
+from service.workfilesservice import Task
 
 class MiliCloudTest(unittest.TestCase):
     
@@ -14,7 +14,7 @@ class MiliCloudTest(unittest.TestCase):
     
 
     def testGetTaskName(self):
-        print self.mili.callService('20','Asset') 
+        print self.mili.callService('82','Shot') 
     
   
 if __name__ == "__main__":  

@@ -2,7 +2,7 @@
 import re
 from PySide import QtGui,QtCore
 import os
-from common.datacommon import Data 
+from common.datacommon import Data
 
 class Fun(object):
     def fiterData(self,userinput,sourceList):
@@ -64,11 +64,6 @@ class Fun(object):
         outputList.setItem(index,3,itemType)
         outputList.setItem(index,4,itemPath)
         outputList.setRowHeight(index,90)
-        outputList.setColumnWidth(1,120)
-        outputList.setColumnHidden(0,True)
-        outputList.setColumnHidden(3,True)
-        outputList.setColumnHidden(4,True)
-        outputList.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
   
     def setImg(self,imgPath):
         imgLabel = QtGui.QLabel()
@@ -100,4 +95,12 @@ class Fun(object):
         directory = baseDir +imageId+'/'+ imgName
         if not os.path.exists(fullPathFileName):
             Data().downLoad(directory, fullPathFileName)
-        return fullPathFileName
+        return fullPathFileName   
+    
+    def setTableShow(self,outputList):
+        outputList.setColumnWidth(1,120)
+        outputList.setColumnHidden(0,True)
+        outputList.setColumnHidden(3,True)
+        outputList.setColumnHidden(4,True)
+        outputList.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)    
+        

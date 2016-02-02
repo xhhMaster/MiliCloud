@@ -1,29 +1,27 @@
 # -*- coding: utf-8 -*-
 import lib.requests as requests
+import conf.apiconfig as conf
 
 class Shot(object):
-    
-    def __init__(self):
-        self.url = 'http://192.168.150.233:4267/api/shotList/load?step_id&related_asset_id&project_id='
-       
-    def __getShotName(self,projectID):
-        result = requests.post(self.url+projectID)
+    def __getShot(self,projectID):
+        result = requests.post(conf.shotApi+projectID)
         if result.text != u"null":
             return result.json()['SHOTS']
         else:
             return ""
+          
+    def callService(self,projectID):
+        return self.__getShot(projectID)
     
-    def __getShotInfo(self,pid,entityId,entityType):
-        self.url = 'http://192.168.150.233:4267/api/maya/selectShotAsset?project_id='
-        self.url = self.url + pid + '&entity_id=' + entityId + '&entity_type=' + entityType 
-        result = requests.post(self.url)
+class SingalShot(object):
+    def __getSingalShot(self,pid,entityId,entityType):
+        url = conf.singalShotApi + pid + '&entity_id=' + entityId + '&entity_type=' + entityType 
+        result = requests.post(url)
         if result.text != u"null":
             return result.json()['SA']
         else:
             return ""
-          
-    def callService(self,projectID):
-        return self.__getShotName(projectID)
+        
     
-    def callInfoService(self,pid,entityId,entityType):
-        return self.__getShotInfo(pid,entityId,entityType)
+    def callService(self,pid,entityId,entityType):
+        return self.__getSingalShot(pid,entityId,entityType)

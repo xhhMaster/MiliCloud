@@ -1,15 +1,12 @@
 # -*- coding: utf-8 -*-
 import lib.requests as requests
+import conf.apiconfig as conf
 
 class Publish(object):
-    
-    def __init__(self):
-        self.url = 'http://192.168.150.233:4267/api/versionAdd/upload?f='
-       
     def __upLoad(self,fileName,directory):
-        self.url = self.url + directory
+        url = conf.publishApi + directory
         files = {'file': open(fileName, 'rb')}
-        requests.post(self.url, files=files)
+        requests.post(url, files=files)
         
           
     def callService(self,fileName,directory):

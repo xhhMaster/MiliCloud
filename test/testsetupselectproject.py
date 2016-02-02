@@ -8,7 +8,7 @@ class SelectProjectTest(unittest.TestCase):
     
     def setUp(self):       
         app = QtGui.QApplication(sys.argv) 
-        t = '%d' %5 
+        t = '%d' %5
         self.project = Widget(t)     
         self.project.show()
         app.exec_()         

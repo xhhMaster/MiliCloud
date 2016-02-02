@@ -39,8 +39,8 @@ class Widget(QtGui.QWidget, Ui_Widget):
         self.warning = UI().initMessageBox()
         self.warning.setIcon(QtGui.QMessageBox.Critical)     
         self.ShotAndAsset()
-        self.searchSA.textChanged.connect(self.inputSATxtChanged)
-        self.searchTask.textChanged.connect(self.inputTaskTxtChanged)
+        self.searchSA.textChanged.connect(self.SATxtChanged)
+        self.searchTask.textChanged.connect(self.taskTxtChanged)
         self.shotList.clicked.connect(lambda:self.task(self.shotList,self.taskList))
         self.assetList.clicked.connect(lambda:self.task(self.assetList,self.taskList))
         self.selBtn.clicked.connect(self.openSelectedTask)
@@ -51,12 +51,12 @@ class Widget(QtGui.QWidget, Ui_Widget):
     #点击取消按钮触发的事件    
     
     def cancelClicked(self):
-        self.close()
+        self.nextPage()
 
     def ShotAndAsset(self):
         queryField = ['id','name','description']
-        shotData = Data().getShotInfo(self.pid)
-        assetData = Data().getAssetInfo(self.pid)
+        shotData = Data().getShot(self.pid)
+        assetData = Data().getAsset(self.pid)
         self.bindingData(shotData,self.shotList,queryField,'Shot')
         self.bindingData(assetData,self.assetList,queryField,'Asset')
     
@@ -72,40 +72,37 @@ class Widget(QtGui.QWidget, Ui_Widget):
         selectedRow = sourceList.currentIndex().row()
         self.selectedId = sourceList.item(selectedRow,0).text()
         self.selectedType = sourceList.item(selectedRow,3).text()
-        taskData = Data().getTaskInfo(self.selectedId,self.selectedType,self.uid,self.pid)
+        taskData = Data().getTask(self.selectedId,self.selectedType,self.uid,self.pid)
         queryField = ['task_id','name','user_id']
         self.bindingData(taskData,outputList,queryField,'Task')
     
-    def inputSATxtChanged(self):
+    def SATxtChanged(self):
         userInput = self.searchSA.text() 
         self.searchTask.clear()
         self.taskList.setRowCount(0)
         Fun().sourceDataISNULL(self.taskList,'Task')
-        self.searchData(userInput)
-       
-    def searchData(self,userInput):
+        self.shotList.setRowCount(0)
+        self.shotList.clearContents()
+        self.assetList.setRowCount(0)
+        self.assetList.clearContents()
         self.ShotAndAsset()
         if userInput != '':
-            self.getData(userInput,self.shotList,'Shot')
-            self.getData(userInput,self.assetList,'Asset')
-            
-    def inputTaskTxtChanged(self):
+            self.bindindSearchData(userInput,self.shotList,'Shot')
+            self.bindindSearchData(userInput,self.assetList,'Asset')
+ 
+    def taskTxtChanged(self):
         userInput = self.searchTask.text()
-        ImgPath = 'C:/Users/HH.Pic-p-127/Documents/maya/scripts/Image/12.jpg'
-        self.searchTaskData(userInput,ImgPath)
-  
-    def searchTaskData(self,userInput,ImgPath):
-        self.resetControl()
+        self.resetUI()
         if userInput != '':
             if (self.shotList.currentIndex().row() != -1 or
                 self.assetList.currentIndex().row() != -1 ):
-                self.getData(userInput,self.taskList,'Task')
+                self.bindindSearchData(userInput,self.taskList,'Task')
             else:
                 self.taskList.show()
         else:     
             self.taskList.show()
-           
-    def resetControl(self):
+  
+    def resetUI(self):
         self.taskList.setRowCount(0)
         if self.shotList.currentIndex().row() != -1:
             self.getTask(self.shotList,self.taskList)
@@ -147,10 +144,11 @@ class Widget(QtGui.QWidget, Ui_Widget):
                 else:
                     imgPath = 'D:/mayaDownload/Image/000.png'
                 Fun().bindingDataSingal(index,content,outputList,queryField,imgPath,Flag)
+            Fun().setTableShow(outputList)
         else:
             Fun().sourceDataISNULL(outputList,Flag)
         
-    def getData(self,userInput,outputList,Flag):
+    def bindindSearchData(self,userInput,outputList,Flag):
         if Flag == 'Shot': 
             resultData = Fun().fiterData(userInput,self.shotList)
         elif Flag == 'Asset':
@@ -159,9 +157,27 @@ class Widget(QtGui.QWidget, Ui_Widget):
             resultData = Fun().fiterData(userInput,self.taskList)
                
         outputList.setRowCount(0)
+        
         if len(resultData) > 0 :
             for index,content in enumerate(resultData):
                 imgPath = content[3]
                 Fun().bindingDataSingal(index,content,outputList,[0,1],imgPath,Flag)
+            Fun().setTableShow(outputList)
         else:
             Fun().sourceDataISNULL(outputList,Flag)
+    
+    def nextPage(self):
+        maxValue = self.shotList.verticalScrollBar().maximum()
+        nCurScroller  = self.shotList.verticalScrollBar().value()
+        if  nCurScroller < maxValue:
+            self.shotList.verticalScrollBar().setSliderPosition(3 + nCurScroller)
+        else:
+            self.shotList.verticalScrollBar().setSliderPosition(0)
+    
+    def prePage(self):
+        maxValue = self.shotList.verticalScrollBar().maximum()
+        nCurScroller  = self.shotList.verticalScrollBar().value()
+        if nCurScroller > 0:
+            self.shotList.verticalScrollBar().setSliderPosition(nCurScroller - 3)
+        else:
+            self.shotList.verticalScrollBar().setSliderPosition(maxValue)

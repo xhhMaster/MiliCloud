@@ -1,14 +1,11 @@
 # -*- coding: utf-8 -*-
 import lib.requests as requests
+import conf.apiconfig as conf
 
 class Login(object):
-    
-    def __init__(self):
-        self.url = 'http://192.168.150.233:4267/api/login' 
-       
     def __getUserInfo(self,userName,password):
-        self.url = self.url + '?name=' + userName + '&password=' + password
-        result=requests.post(self.url)
+        url = conf.loginApi + '?name=' + userName + '&password=' + password
+        result=requests.post(url)
         if  result.json() != "error":
             return result.json()['Table']
         else:

@@ -3,7 +3,8 @@ from PySide import QtGui,QtCore
 from ui.selectproject_ui import Ui_Widget
 from common.uicommon import UI
 from common.uicommon import Msg
-
+from common.datacommon import Data 
+from common.funcommon import Fun
 
 class Widget(QtGui.QWidget, Ui_Widget):
 
@@ -11,6 +12,7 @@ class Widget(QtGui.QWidget, Ui_Widget):
         super(Widget,self).__init__(parent)
         self.uid = uid
         self.setupUi(self)
+        self.mainLayout = QtGui.QVBoxLayout()
         self.warning = UI().initMessageBox()
         self.warning.setIcon(QtGui.QMessageBox.Critical)     
         self.bindingProject()
@@ -44,19 +46,13 @@ class Widget(QtGui.QWidget, Ui_Widget):
         
     #绑定数据到项目列表中
     def bindingProject(self):
-        #导入projectservice
-        import service.projectservice as projectservice
-        
         #获取项目数据
-        contents = projectservice.Project().callService()
-        
-        #设置列数
-        self.projectList.setColumnCount(3)
-        #设置列title
-        header = ['projectID','projectName','description']
-        #绑定列title到projectList控件
-        self.projectList.setHorizontalHeaderLabels(header)
-   
+        contents = Data().getProject()
+        self.projectList = UI().initTableWidget(['projectID','projectName','description'],3)
+        self.projectList.setColumnHidden(0,True)
+        self.projectList.setColumnHidden(2,True) 
+        self.mainLayout.addWidget(self.projectList)
+        self.projectGroupBox.setLayout(self.mainLayout)
         if len(contents) > 0:
             for index,content in enumerate(contents):
                 #动态插入行
@@ -71,18 +67,9 @@ class Widget(QtGui.QWidget, Ui_Widget):
                 self.projectList.setItem(index,0,itemId)
                 self.projectList.setItem(index,1,itemName)
                 self.projectList.setItem(index,2,itemDesc)
-                #设置列隐藏显示        
-                self.projectList.setColumnHidden(0,True)
-                self.projectList.setColumnHidden(2,True)   
+            
         else:
-            self.projectList.setRowCount(10)
-            self.projectList.setSelectionMode(QtGui.QAbstractItemView.NoSelection)
-            self.projectList.setSpan(3, 1, 5, 3);
-            msg = QtGui.QTableWidgetItem(u"没有找到相关内容")
-            self.projectList.setItem(3,1,msg) 
-            #去除光标
-            self.projectList.setFocusPolicy(QtCore.Qt.NoFocus);
-            self.selectBtn.setHidden(True)
+            Fun.sourceDataISNULL(self.projectList, 'Project')
     
         #设置projectList默认不选中
         index = QtCore.QModelIndex()

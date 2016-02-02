@@ -1,14 +1,10 @@
 # -*- coding: utf-8 -*-
 import lib.requests as requests
-
+import conf.apiconfig as conf
 
 class AddVersion(object):
-    
-    def __init__(self):
-        self.url = 'http://192.168.150.233:4267/api/versionAdd/mayaInsert'
-       
     def __UploadData(self,data):
-        result = requests.post(self.url,data)
+        result = requests.post(conf.addVersionApi,data)
         return result.text
           
     def callService(self,data):

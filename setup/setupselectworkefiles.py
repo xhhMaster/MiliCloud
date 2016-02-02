@@ -44,44 +44,37 @@ class Widget(QtGui.QWidget, Ui_Widget):
         self.openSelectedFile()
         
     def getProject(self): 
-        self.projectInfo = Data().getProject(self.pid)
-        for index,content in enumerate(self.projectInfo):
-            imageId = content[u'image_id']
-            imgPath = Fun().getImgPath(str(imageId), 'thumbnails/')
-            Fun().bindingDataSingal(index,content,self.projectList,['id','name','description'],imgPath,'Project')
+        self.projectInfo = Data().getSingalProject(self.pid)
+        path = 'thumbnails/'
+        queryField = ['id','name','description']
+        self.bindingData(self.projectInfo,self.projectList,path,queryField,'Project')
         self.projectList.setSelectionMode(QtGui.QAbstractItemView.NoSelection)
         self.projectList.setFocusPolicy(QtCore.Qt.NoFocus)
     
     def getSA(self):
         if self.selectedType == 'Shot':
-            self.resultInfo = Data().getShot(self.pid,self.selectedId,self.selectedType)
+            self.resultInfo = Data().getSingalShot(self.pid,self.selectedId,self.selectedType)
         else:
-            self.resultInfo = Data().getAsset(self.pid,self.selectedId,self.selectedType)
-        for index,content in enumerate(self.resultInfo):
-            imageId = content[u'image_id']
-            imgPath = Fun().getImgPath(str(imageId), 'thumbnails/')
-            Fun().bindingDataSingal(index,content,self.SAList,['id','name','description'],imgPath,self.selectedType)
+            self.resultInfo = Data().getSingalAsset(self.pid,self.selectedId,self.selectedType)
+        path = 'thumbnails/'
+        queryField = ['id','name','description']
+        self.bindingData(self.resultInfo,self.SAList,path,queryField,self.selectedType)
         self.SAList.setSelectionMode(QtGui.QAbstractItemView.NoSelection)
         self.SAList.setFocusPolicy(QtCore.Qt.NoFocus)
         
     def getTask(self):
-        self.taskInfo = Data().getTask(self.uid,self.selectedId,self.selectedType,self.taskID,self.pid)
-        for index,content in enumerate(self.taskInfo):
-            imageId = content[u'image_id']
-            imgPath = Fun().getImgPath(str(imageId), 'thumbnails/')
-            Fun().bindingDataSingal(index,content,self.taskList, ['task_id','name','user_id'],imgPath,'Task')
+        self.taskInfo = Data().getSingalTask(self.uid,self.selectedId,self.selectedType,self.taskID,self.pid)
+        path = 'thumbnails/'
+        queryField = ['task_id','name','user_id']
+        self.bindingData(self.taskInfo,self.taskList,path,queryField,'Task')
         self.taskList.setSelectionMode(QtGui.QAbstractItemView.NoSelection)
         self.taskList.setFocusPolicy(QtCore.Qt.NoFocus)
     
     def getWorkFile(self):
         fileInfo = Data().getWorkFile(self.taskID,'Task')
-        if len(fileInfo) > 0 :
-            for index,content in enumerate(fileInfo):
-                imageId = content[u'image_id']
-                imgPath = Fun().getImgPath(str(imageId), 'version/MayaPushImage/')
-                Fun().bindingDataSingal(index,content,self.fileList,['id','code','user_id'],imgPath,'Work')
-        else:
-            Fun().sourceDataISNULL(self.fileList,'Work')
+        path = 'version/MayaPushImage/'
+        queryField = ['id','code','user_id']
+        self.bindingData(fileInfo,self.fileList,path,queryField,'Work')
       
        
     def bindingComboBox(self):
@@ -138,3 +131,13 @@ class Widget(QtGui.QWidget, Ui_Widget):
         self.workLayout = QtGui.QVBoxLayout() 
         self.workLayout.addWidget(self.fileList)
         self.workFile.setLayout(self.workLayout) 
+
+    def bindingData(self,soureData,outputList,path,queryField,Flag):
+        if len(soureData) > 0 :
+            for index,content in enumerate(soureData):
+                imageId = content[u'image_id']
+                imgPath = Fun().getImgPath(str(imageId), path)
+                Fun().bindingDataSingal(index,content,outputList,queryField,imgPath,Flag)
+            Fun().setTableShow(outputList)
+        else:
+            Fun().sourceDataISNULL(outputList,Flag)

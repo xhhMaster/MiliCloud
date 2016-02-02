@@ -99,7 +99,7 @@ class Widget(QtGui.QWidget, Ui_Widget):
     #绑定项目名
     def comboBoxForProject(self):
         self.projectComboBox.setMinimumWidth(500)
-        data = Data().getProjectInfo()
+        data = Data().getProject()
         self.projectList = UI().initTableWidget(['ID','Name'],2)
         txt = u"暂无项目请先创建"
         self.__addItem(data,self.projectList,self.projectComboBox,txt,'Project')
@@ -166,9 +166,9 @@ class Widget(QtGui.QWidget, Ui_Widget):
         pid = self.__getSelectedId(self.projectComboBox,self.projectList)
         data = ''
         if ptype == 'Shot':
-            data = Data().getShotInfo(pid)
+            data = Data().getShot(pid)
         if ptype == 'Asset':
-            data = Data().getAssetInfo(pid)
+            data = Data().getAsset(pid)
         if ptype != 'Shot' and ptype != 'Asset':
             data = -1
         return data

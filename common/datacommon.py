@@ -5,36 +5,36 @@ import service.assetservice as assetservice
 import service.taskservice as taskservice
 
 class Data(object):
-    def getProjectInfo(self):
+    def getProject(self):
         contents = projectservice.Project().callService()
         return contents
     
-    def getProject(self,pid):
-        contents = projectservice.Project().callInfoService(pid)
+    def getSingalProject(self,pid):
+        contents = projectservice.SingalProject().callService(pid)
         return contents
         
-    def getShotInfo(self,pid):
+    def getShot(self,pid):
         contents = shotservice.Shot().callService(pid)
         return contents
     
-    def getShot(self,pid,entityId,entityType):
-        contents = shotservice.Shot().callInfoService(pid,entityId,entityType)
+    def getSingalShot(self,pid,entityId,entityType):
+        contents = shotservice.SingalShot().callService(pid,entityId,entityType)
         return contents
     
-    def getAssetInfo(self,pid):
+    def getAsset(self,pid):
         contents = assetservice.Asset().callService(pid)
         return contents
     
-    def getAsset(self,pid,entityId,entityType):
-        contents = assetservice.Asset().callInfoService(pid,entityId,entityType)
+    def getSingalAsset(self,pid,entityId,entityType):
+        contents = assetservice.SingalAsset().callService(pid,entityId,entityType)
         return contents
     
-    def getTaskInfo(self,entity_id,entity_type,user_id,pid):
+    def getTask(self,entity_id,entity_type,user_id,pid):
         contents = taskservice.Task().callService(entity_id,entity_type,user_id,pid)  
         return contents
     
-    def getTask(self,uid,entity_id,entity_type,taskId,pid):
-        contents = taskservice.Task().callInfoService(uid,entity_id,entity_type,taskId,pid)  
+    def getSingalTask(self,uid,entity_id,entity_type,taskId,pid):
+        contents = taskservice.SingalTask().callService(uid,entity_id,entity_type,taskId,pid)  
         return contents
     
     def getMyTask(self,uid,pid,entity_type):

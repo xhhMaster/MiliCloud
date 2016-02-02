@@ -7,9 +7,9 @@ import shiboken
 
 class SelectedWorkFiles_UI(object):
     
-    def __init__(self):
+    def __init__(self,userID):
         self.UI()
-        
+        self.userID = userID
      
     def UI(self):
         #创建主窗口
@@ -43,7 +43,7 @@ class SelectedWorkFiles_UI(object):
     def btnClicked(self,*args):     
         import setup.setupselectproject as setupselectproject
         self.mainWindow.close()
-        self.Widget = setupselectproject.Widget()
+        self.Widget = setupselectproject.Widget(self.userID)
         self.Widget.show()      
         
             

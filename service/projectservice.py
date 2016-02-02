@@ -12,6 +12,17 @@ class Project(object):
             return result.json()['PROJECTS']
         else:
             return ""
-          
+         
+    def __getProjectInfo(self,pid):
+        self.url = 'http://192.168.150.233:4267/api/maya/selectProject?project_id='
+        result=requests.post(self.url + pid)
+        if result.text != u"null":
+            return result.json()['PROJECT']
+        else:
+            return ""
+     
     def callService(self):
         return self.__getProjectName()
+    
+    def callInfoService(self,pid):
+        return self.__getProjectInfo(pid)

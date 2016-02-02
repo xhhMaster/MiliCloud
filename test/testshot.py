@@ -14,8 +14,9 @@ class MiliCloudTest(unittest.TestCase):
     
     #具体的测试用例，一定要以test开头   
     def testGetProjectName(self):
-        t = '6'
-        print self.mili.callService(t) 
+        t1 = '%d' %15
+        t2 = '%d' %2 
+        print self.mili.callService(t2) 
     
   
 if __name__ == "__main__":  

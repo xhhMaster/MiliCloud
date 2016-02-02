@@ -10,7 +10,7 @@ class PublishTest(unittest.TestCase):
     
     def setUp(self):       
         app = QtGui.QApplication(sys.argv) 
-        self.project = Widget()     
+        self.project = Widget(5)     
         self.project.show()
         app.exec_()         
     

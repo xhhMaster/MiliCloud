@@ -1,14 +1,18 @@
 # -*- coding: utf-8 -*-
 from PySide import QtGui,QtCore
 from ui.selectproject_ui import Ui_Widget
-import maya.cmds as cmds
+from common.uicommon import UI
+from common.uicommon import Msg
 
 
 class Widget(QtGui.QWidget, Ui_Widget):
 
-    def __init__(self, parent=None):
+    def __init__(self,uid,parent=None):
         super(Widget,self).__init__(parent)
+        self.uid = uid
         self.setupUi(self)
+        self.warning = UI().initMessageBox()
+        self.warning.setIcon(QtGui.QMessageBox.Critical)     
         self.bindingProject()
         self.selectBtn.clicked.connect(self.selectedClicked)
         self.cancelBtn.clicked.connect(self.cancelClicked)
@@ -23,21 +27,16 @@ class Widget(QtGui.QWidget, Ui_Widget):
             selectedRow = self.projectList.currentItem().row()
             #获取选中的ID
             selectedId = self.projectList.item(selectedRow,0).text()
-            #获取选中的内容
-            selectedContent = self.projectList.item(selectedRow,1).text()
-            #获取选中内容的描述
-            selectedDesc = self.projectList.item(selectedRow,2).text()
-            #如果选中的内容描述为空则设置默认值
-            if selectedDesc == "":
-                selectedDesc = u"暂无内容"
-                       
-            import setup.setupselectworkfiles as setupselectworkfiles
-            self.Widget = setupselectworkfiles.Widget(pid = selectedId,content = selectedContent,desc = selectedDesc)
+       
+            import setup.setupselecttask as setupselecttask
+            self.Widget = setupselecttask.Widget(selectedId,self.uid)
             self.Widget.show() 
             self.close()                
         else:
-            #提示信息
-            cmds.confirmDialog(b=u"确定",m=u"请选择一个项目！",t=u"提示信息")
+            txtTitle = u'提示信息'
+            txtMainContent = u'操作失败！                                             '
+            txtSubContent =  u'请选择一个项目！'
+            Msg().showDialog(self.warning, txtTitle, txtMainContent, txtSubContent)
     
     #点击取消按钮触发的事件    
     def cancelClicked(self):

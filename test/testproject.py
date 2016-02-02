@@ -11,8 +11,9 @@ class MiliCloudTest(unittest.TestCase):
     def tearDown(self):  
         self.mili = None  
    
-    def testGetProjectName(self):  
-        print self.mili.callService()
+    def testGetProjectName(self): 
+        t = '%d' %2  
+        print self.mili.callInfoService(t)
   
 if __name__ == "__main__":  
     unittest.main()  

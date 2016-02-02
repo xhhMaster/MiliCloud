@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 import unittest
-from service.workfilesservice import Task
+from service.taskservice import MyTask
 
 class MiliCloudTest(unittest.TestCase):
     
   
     def setUp(self):        
-        self.mili = Task()
+        self.mili = MyTask()
         
     
     def tearDown(self):  
@@ -14,7 +14,11 @@ class MiliCloudTest(unittest.TestCase):
     
 
     def testGetTaskName(self):
-        print self.mili.callService('82','Shot') 
+        t= '%d' %20
+        t1= '%d' %1
+        t2= '%d' %1
+        t3= '%d' %540
+        self.mili.callService(t1,t2,'')
     
   
 if __name__ == "__main__":  

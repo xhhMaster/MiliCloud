@@ -6,6 +6,7 @@ class Login(object):
     def __getUserInfo(self,userName,password):
         url = conf.loginApi + '?name=' + userName + '&password=' + password
         result=requests.post(url)
+        print result.url,result.text
         if  result.json() != "error":
             return result.json()['Table']
         else:

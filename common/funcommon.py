@@ -10,18 +10,23 @@ class Fun(object):
         pattern = '.*?'.join(userinput)   
         regex = re.compile(pattern)
         rows = sourceList.rowCount()
-        for rows_index in range(rows):
-            itemId = sourceList.item(rows_index,0).text()
-            itemName = sourceList.item(rows_index,2).text()
-            itemType = sourceList.item(rows_index,3).text()
-            itemPath = sourceList.item(rows_index,4).text()
-            match = regex.search(itemName) 
-            if match:
-                suggestions.append((len(match.group()), match.start(), (itemId,itemName,itemType,itemPath)))
-        return [x for _, _, x in sorted(suggestions)]
+        if rows > 0:
+            for rows_index in range(rows):
+                itemId = sourceList.item(rows_index,0).text()
+                itemName = sourceList.item(rows_index,2).text()
+                itemType = sourceList.item(rows_index,3).text()
+                itemPath = sourceList.item(rows_index,4).text()
+                match = regex.search(itemName) 
+                if match:
+                    suggestions.append((len(match.group()), match.start(), (itemId,itemName,itemType,itemPath)))
+                    
+            return [x for _, _, x in sorted(suggestions)]
+        else:
+            return suggestions
     
     def sourceDataISNULL(self,outputList,Flag):
-        outputList.setRowCount(3)
+        outputList.clearContents()
+        outputList.setRowCount(1)
         if Flag == 'Shot':
             txt =u"没有Shot相关内容"
         elif Flag == 'Asset':
@@ -33,11 +38,10 @@ class Fun(object):
         else:
             txt = u"没有Task相关内容"
         contentItem = QtGui.QTableWidgetItem(txt)
-        outputList.setItem(2,1,contentItem) 
-        outputList.setFocusPolicy(QtCore.Qt.NoFocus)
         outputList.setColumnHidden(0,False)
-        outputList.setColumnHidden(2,False)
-        outputList.setSpan(2, 1, 3, 3)
+        outputList.setItem(0,0,contentItem) 
+        outputList.setSpan(0, 0, 1, 4)
+        outputList.setFocusPolicy(QtCore.Qt.NoFocus)
         outputList.setSelectionMode(QtGui.QAbstractItemView.NoSelection)
     
     def bindingDataSingal(self,index,content,outputList,queryField,imgPath,Flag):
@@ -102,5 +106,5 @@ class Fun(object):
         outputList.setColumnHidden(0,True)
         outputList.setColumnHidden(3,True)
         outputList.setColumnHidden(4,True)
-        outputList.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)    
-        
+        outputList.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
+    

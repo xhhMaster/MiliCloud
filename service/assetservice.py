@@ -16,7 +16,7 @@ class Asset(object):
     
 class SingalAsset(object):
     def __getSingalAsset(self,pid,entityId,entityType):
-        url = conf.singalAssetApi + pid + '&entity_id=' + entityId + '&entity_type=' + entityType 
+        url = conf.singalSAApi + pid + '&entity_id=' + entityId + '&entity_type=' + entityType 
         result = requests.post(url)
         if result.text != u"null":
             return result.json()['SA']

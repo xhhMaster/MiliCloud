@@ -14,6 +14,8 @@ class Widget(QtGui.QWidget, Ui_Widget):
         self.uid = str(uid)
         self.shotList = UI().initTableWidget(['ID','Image','Name','Type','ImgPath'],5)
         self.assetList = UI().initTableWidget(['ID','Image','Name','Type','ImgPath'],5)
+        self.cacheShotList = UI().initTableWidget(['ID','Image','Name','Type','ImgPath'],5)
+        self.cacheAssetList = UI().initTableWidget(['ID','Image','Name','Type','ImgPath'],5)
         self.taskList = UI().initTableWidget(['ID','Image','Name','Type','ImgPath'],5) 
         self.setupUi(self)
         self.searchSA.setStyleSheet("background-image: url(C:/Users/HH.Pic-p-127/Documents/maya/scripts/Image/search.png);\n"
@@ -39,6 +41,7 @@ class Widget(QtGui.QWidget, Ui_Widget):
         self.warning = UI().initMessageBox()
         self.warning.setIcon(QtGui.QMessageBox.Critical)     
         self.ShotAndAsset()
+        self.cacheData()
         self.searchSA.textChanged.connect(self.SATxtChanged)
         self.searchTask.textChanged.connect(self.taskTxtChanged)
         self.shotList.clicked.connect(lambda:self.task(self.shotList,self.taskList))
@@ -49,7 +52,6 @@ class Widget(QtGui.QWidget, Ui_Widget):
        
         
     #点击取消按钮触发的事件    
-    
     def cancelClicked(self):
         self.nextPage()
 
@@ -59,14 +61,22 @@ class Widget(QtGui.QWidget, Ui_Widget):
         assetData = Data().getAsset(self.pid)
         self.bindingData(shotData,self.shotList,queryField,'Shot')
         self.bindingData(assetData,self.assetList,queryField,'Asset')
-    
+       
+    def cacheData(self):
+        queryField = ['id','name','description']
+        shotData = Data().getShot(self.pid)
+        assetData = Data().getAsset(self.pid)
+        self.bindingData(shotData,self.cacheShotList,queryField,'Shot')
+        self.bindingData(assetData,self.cacheAssetList,queryField,'Asset')
+        
+        
     def task(self,sourceList,outputList):
         userInput = self.searchTask.text()  
         outputList.setRowCount(0)
         if userInput == '':
             self.getTask(sourceList,self.taskList)
         else:
-            self.inputTaskTxtChanged()
+            self.taskTxtChanged()
           
     def getTask(self,sourceList,outputList):
         selectedRow = sourceList.currentIndex().row()
@@ -79,21 +89,23 @@ class Widget(QtGui.QWidget, Ui_Widget):
     def SATxtChanged(self):
         userInput = self.searchSA.text() 
         self.searchTask.clear()
+        self.taskList.clearContents()
         self.taskList.setRowCount(0)
-        Fun().sourceDataISNULL(self.taskList,'Task')
-        self.shotList.setRowCount(0)
-        self.shotList.clearContents()
-        self.assetList.setRowCount(0)
-        self.assetList.clearContents()
-        self.ShotAndAsset()
+        # Fun().sourceDataISNULL(self.taskList,'Task')
         if userInput != '':
             self.bindindSearchData(userInput,self.shotList,'Shot')
             self.bindindSearchData(userInput,self.assetList,'Asset')
- 
+        else:
+            self.shotList.clearContents()
+            self.shotList.setRowCount(0)
+            self.assetList.clearContents()
+            self.assetList.setRowCount(0)
+            self.ShotAndAsset()
+         
     def taskTxtChanged(self):
         userInput = self.searchTask.text()
         self.resetUI()
-        if userInput != '':
+        if userInput != '' and self.taskList.item(0,0).text()!= u'没有Task相关内容':
             if (self.shotList.currentIndex().row() != -1 or
                 self.assetList.currentIndex().row() != -1 ):
                 self.bindindSearchData(userInput,self.taskList,'Task')
@@ -103,6 +115,7 @@ class Widget(QtGui.QWidget, Ui_Widget):
             self.taskList.show()
   
     def resetUI(self):
+        self.taskList.clearContents()
         self.taskList.setRowCount(0)
         if self.shotList.currentIndex().row() != -1:
             self.getTask(self.shotList,self.taskList)
@@ -110,7 +123,7 @@ class Widget(QtGui.QWidget, Ui_Widget):
             self.getTask(self.assetList,self.taskList)
         else:
             Fun().sourceDataISNULL(self.taskList,'Task')
-    
+        
     def openSelectedTask(self):
         selectedRow = self.taskList.currentIndex().row()
         selectedTaskID = self.taskList.item(selectedRow,0).text()
@@ -135,6 +148,7 @@ class Widget(QtGui.QWidget, Ui_Widget):
         self.scrollAreaForTask.setLayout(self.taskLayout)
     
     def bindingData(self,sourceData,outputList,queryField,Flag):
+        outputList.clearContents()
         outputList.setRowCount(0)
         if len(sourceData) > 0 :
             for index,content in enumerate(sourceData):
@@ -150,14 +164,14 @@ class Widget(QtGui.QWidget, Ui_Widget):
         
     def bindindSearchData(self,userInput,outputList,Flag):
         if Flag == 'Shot': 
-            resultData = Fun().fiterData(userInput,self.shotList)
+            resultData = Fun().fiterData(userInput,self.cacheShotList)
         elif Flag == 'Asset':
-            resultData = Fun().fiterData(userInput,self.assetList)
+            resultData = Fun().fiterData(userInput,self.cacheAssetList)
         else:
             resultData = Fun().fiterData(userInput,self.taskList)
-               
-        outputList.setRowCount(0)
         
+        outputList.clearContents()
+        outputList.setRowCount(0)       
         if len(resultData) > 0 :
             for index,content in enumerate(resultData):
                 imgPath = content[3]
@@ -166,18 +180,3 @@ class Widget(QtGui.QWidget, Ui_Widget):
         else:
             Fun().sourceDataISNULL(outputList,Flag)
     
-    def nextPage(self):
-        maxValue = self.shotList.verticalScrollBar().maximum()
-        nCurScroller  = self.shotList.verticalScrollBar().value()
-        if  nCurScroller < maxValue:
-            self.shotList.verticalScrollBar().setSliderPosition(3 + nCurScroller)
-        else:
-            self.shotList.verticalScrollBar().setSliderPosition(0)
-    
-    def prePage(self):
-        maxValue = self.shotList.verticalScrollBar().maximum()
-        nCurScroller  = self.shotList.verticalScrollBar().value()
-        if nCurScroller > 0:
-            self.shotList.verticalScrollBar().setSliderPosition(nCurScroller - 3)
-        else:
-            self.shotList.verticalScrollBar().setSliderPosition(maxValue)

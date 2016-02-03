@@ -2,7 +2,7 @@
 from PySide import QtGui,QtCore
 import maya.OpenMayaUI as mui
 import shiboken
-
+import conf.msgconfig as suggestion
 
 
 class SelectedWorkFiles_UI(object):
@@ -17,10 +17,10 @@ class SelectedWorkFiles_UI(object):
         self.mainWindow = QtGui.QMainWindow(parent)
         self.mainWindow.setMaximumSize(650,350)
         self.mainWindow.setMinimumSize(650,350)
-        self.mainWindow.setWindowTitle(u"选择文件")
+        self.mainWindow.setWindowTitle(suggestion.selectWorkFile)
         Widget = QtGui.QWidget()
         self.mainWindow.setCentralWidget(Widget)
-        groupBox = QtGui.QGroupBox(u"提示信息")
+        groupBox = QtGui.QGroupBox(suggestion.prompt)
         groupBox.setStyleSheet("font-size:15px;")
         #外层布局
         outLayout = QtGui.QVBoxLayout()

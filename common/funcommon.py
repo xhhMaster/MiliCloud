@@ -3,6 +3,7 @@ import re
 from PySide import QtGui,QtCore
 import os
 from common.datacommon import Data
+import conf.msgconfig as suggestion
 
 class Fun(object):
     def fiterData(self,userinput,sourceList):
@@ -28,15 +29,15 @@ class Fun(object):
         outputList.clearContents()
         outputList.setRowCount(1)
         if Flag == 'Shot':
-            txt =u"没有Shot相关内容"
+            txt = suggestion.isNoShot
         elif Flag == 'Asset':
-            txt = u"没有Asset相关内容"
+            txt = suggestion.isNoAsset
         elif Flag == 'Project':
-            txt = u"没有Project相关内容"
+            txt = suggestion.isNoProject
         elif Flag == 'Work':
-            txt = u"没有Work File相关内容"
+            txt = suggestion.isNoWorkFile
         else:
-            txt = u"没有Task相关内容"
+            txt = suggestion.isNoTask
         contentItem = QtGui.QTableWidgetItem(txt)
         outputList.setColumnHidden(0,False)
         outputList.setItem(0,0,contentItem) 
@@ -89,16 +90,10 @@ class Fun(object):
         if not pathDir:
             os.makedirs(filePath)
         
-        """
-        fullPathFileName = unicode(filePath + self.projectInfo[0]['name']+'/'
-            +self.resultInfo[0]['name']+'/'
-            +self.taskInfo[0]['name']+'/'+ imgName)
-        """
-        
         fullPathFileName = filePath + imgName
         directory = baseDir +imageId+'/'+ imgName
         if not os.path.exists(fullPathFileName):
-            Data().downLoad(directory, fullPathFileName)
+            Data().downLoad(directory,fullPathFileName)
         return fullPathFileName   
     
     def setTableShow(self,outputList):

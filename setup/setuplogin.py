@@ -3,6 +3,7 @@ from PySide import QtGui
 from ui.login_ui import Ui_Widget
 from common.uicommon import UI
 from common.uicommon import Msg
+import conf.msgconfig as suggestion
 
 class Widget(QtGui.QWidget, Ui_Widget):
     def __init__(self, parent=None):
@@ -26,9 +27,6 @@ class Widget(QtGui.QWidget, Ui_Widget):
             MenuGenerator().updateMenu(userName,userID)
             self.close()
         else:
-            txtTitle = u'警告信息'
-            txtMainContent = u'登录失败！                                             '
-            txtSubContent =  u'用户名或密码错误！'
-            Msg().showDialog(self.warning, txtTitle, txtMainContent, txtSubContent)
+            Msg().showDialog(self.warning,suggestion.warning,suggestion.loginFailed,suggestion.failedCause)
             
     

@@ -2,6 +2,7 @@ eclipse.preferences.version=1
 encoding//common/datacommon.py=utf-8
 encoding//common/funcommon.py=utf-8
 encoding//common/uicommon.py=utf-8
+encoding//conf/msgconfig.py=utf-8
 encoding//lib/requests/adapters.py=utf-8
 encoding//lib/requests/api.py=utf-8
 encoding//lib/requests/cookies.py=utf-8

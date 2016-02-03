@@ -7,6 +7,7 @@ from common.uicommon import Msg
 from common.funcommon import Fun
 import os
 import maya.cmds as cmds
+import conf.msgconfig as suggestion
 
 class Widget(QtGui.QWidget, Ui_Widget):
     def __init__(self, uid,pid,entityId,entityType,taskID,parent=None):
@@ -97,10 +98,7 @@ class Widget(QtGui.QWidget, Ui_Widget):
             Data().downLoad('version/MayaPushFile/'+ selectedID+'/'+fileInfo[0], fullPathFileName)
             cmds.file(fullPathFileName,f = 1,type='mayaBinary',o = 1) 
         else:
-            txtTitle = u'警告信息'
-            txtMainContent = u'打开失败！                                             '
-            txtSubContent =  u'请选择工作文件！'
-            Msg().showDialog(self.warning, txtTitle, txtMainContent, txtSubContent)
+            Msg().showDialog(self.warning,suggestion.warning,suggestion.clickedFailed,suggestion.selectWorkFile)
     
     def showData(self):
         self.mainLayout = QtGui.QVBoxLayout()

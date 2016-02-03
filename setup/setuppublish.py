@@ -7,6 +7,8 @@ import time
 from common.datacommon import Data 
 from common.uicommon import UI
 from common.uicommon import Msg
+import conf.msgconfig as suggestion
+import conf.pathConfig as pConf
 
 class Widget(QtGui.QWidget, Ui_Widget):
     def __init__(self,uid,parent=None):
@@ -31,32 +33,23 @@ class Widget(QtGui.QWidget, Ui_Widget):
       
     def save(self):
         if self.__preSave():
-            #判断文件是否存在
             resultFile = os.path.exists(self.fullpath)
             remark = self.contentTxt.toPlainText()
-            txtTitle = u'警告信息'
-            txtMainContent = u'发布失败!              '   
             self.warning.setIcon(QtGui.QMessageBox.Critical)     
             if self.savePath == None:
-                txtSubContent = u'请添加缩略图'
-                Msg().showDialog(self.warning, txtTitle, txtMainContent, txtSubContent)
+                Msg().showDialog(self.warning,suggestion.warning,suggestion.publishFailed,suggestion.imgContent)
                 return False
             if resultFile:
-                txtSubContent = u'当前文件名已经存在，请更改!'
-                Msg().showDialog(self.warning, txtTitle, txtMainContent, txtSubContent)
+                Msg().showDialog(self.warning,suggestion.warning,suggestion.publishFailed,suggestion.fileRename)
                 return False
             if remark == '':
-                txtSubContent = u'请添加备注信息!'
-                Msg().showDialog(self.warning, txtTitle, txtMainContent, txtSubContent)
+                Msg().showDialog(self.warning,suggestion.warning,suggestion.publishFailed,suggestion.remarkContent)
                 return False
             else:   
                 cmds.file(rename = self.fullpath)
                 cmds.file(save =1,type='mayaBinary')
-                txtTitle = u'提示信息'
-                txtMainContent = u'发布成功！                                     '
-                txtSubContent = ''
                 self.warning.setIcon(QtGui.QMessageBox.NoIcon)
-                Msg().showDialog(self.warning, txtTitle, txtMainContent, txtSubContent)
+                Msg().showDialog(self.warning,suggestion.prompt,suggestion.publishSucessed,'')
                 return True
         else:
             return False    
@@ -66,8 +59,8 @@ class Widget(QtGui.QWidget, Ui_Widget):
             self.addImg()
             self.addVersion()
             import service.publishservice as publishservice
-            path = 'MayaPushFile/'+ self.VersionID
-            imgPath = 'MayaPushImage/'+ self.ImageID
+            path = pConf.publishFilePath + self.VersionID
+            imgPath = pConf.publishImgPath + self.ImageID
             publishservice.Publish().callService(self.fullpath,path)
             publishservice.Publish().callService(self.savePath,imgPath)
             self.close()
@@ -97,12 +90,12 @@ class Widget(QtGui.QWidget, Ui_Widget):
         self.ImageID = Data().addImg(data)
        
     #绑定项目名
+    
     def comboBoxForProject(self):
         self.projectComboBox.setMinimumWidth(500)
         data = Data().getProject()
         self.projectList = UI().initTableWidget(['ID','Name'],2)
-        txt = u"暂无项目请先创建"
-        self.__addItem(data,self.projectList,self.projectComboBox,txt,'Project')
+        self.__addItem(data,self.projectList,self.projectComboBox,suggestion.projectContent,'Project')
     
     
         
@@ -111,10 +104,10 @@ class Widget(QtGui.QWidget, Ui_Widget):
         self.typeComboBox.setMinimumWidth(500)
         self.typeComboBox.clear()
         projectName = self.projectComboBox.currentText()
-        if projectName != u'暂无项目请先创建':
+        if projectName != suggestion.projectContent:
             self.typeComboBox.insertItem(0,'Task')
         else:  
-            self.typeComboBox.insertItem(0,u"请先选择项目")
+            self.typeComboBox.insertItem(0,suggestion.selectProject)
     
     #绑定镜头号或者资产名
     def comboBoxForTask(self):
@@ -124,16 +117,15 @@ class Widget(QtGui.QWidget, Ui_Widget):
         pid = self.__getSelectedId(self.projectComboBox,self.projectList)
         data = Data().getMyTask(self.uid,pid, '')
         if data != -1: 
-            txt = u"没有可选的任务,请先去创建"
-            self.__addItem(data,self.List,self.taskComboBox,txt,'Task')
+            self.__addItem(data,self.List,self.taskComboBox,suggestion.taskContent,'Task')
         else:
-            self.taskComboBox.insertItem(0,u"请先选择类型")
+            self.taskComboBox.insertItem(0,suggestion.typeContent)
             return False
       
     #获得选中值ID
     def __getSelectedId(self,comboBox,inputList):
         txt = comboBox.currentText()
-        if txt != u'暂无项目请先创建':
+        if txt != suggestion.projectContent:
             selectedRow = comboBox.currentIndex()
             selectedId = inputList.item(selectedRow,0).text()
         else:
@@ -177,7 +169,7 @@ class Widget(QtGui.QWidget, Ui_Widget):
         self.imageBtn = QtGui.QPushButton()
         self.imageBtn.setMaximumSize(580,160)
         self.imageBtn.setMinimumSize(580,160)
-        self.imageBtn.setIcon(QtGui.QIcon('C:/Users/HH.Pic-p-127/Documents/maya/scripts/Image/camera.png'))
+        self.imageBtn.setIcon(QtGui.QIcon(pConf.iconForScreenBtn))
         self.imageBtn.setIconSize(QtCore.QSize(580, 100))
         self.imageBtn.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         self.imageBtn.clicked.connect(self.grapWindowScreen)
@@ -189,7 +181,7 @@ class Widget(QtGui.QWidget, Ui_Widget):
         self.fullScreenLabel = QtGui.QLabel()
         fullScreenPixmap = QtGui.QPixmap.grabWindow(QtGui.QApplication.desktop().winId())
         self.fullScreenLabel.setPixmap(fullScreenPixmap)
-        myCursor = QtGui.QCursor(QtGui.QPixmap('C:/Users/HH.Pic-p-127/Documents/maya/scripts/Image/pointer.png'),-1,-1);
+        myCursor = QtGui.QCursor(QtGui.QPixmap(pConf.iconForCursor),-1,-1);
         self.fullScreenLabel.setCursor(myCursor)
         self.fullScreenLabel.showFullScreen()
         self.fullScreenLabel.mousePressEvent = lambda event: self.screenShotPressEvent(event)
@@ -278,9 +270,9 @@ class Widget(QtGui.QWidget, Ui_Widget):
     def __preSave(self):
         self.path = 'D:/MayaLocalFile/Sence/'
         fileInfo = self.__customSaveFileInfo()
-        if (fileInfo['projectName'] !=  u'暂无项目请先创建' and 
+        if (fileInfo['projectName'] != suggestion.projectContent and 
             fileInfo['name'] != '' and 
-            fileInfo['content'] != u'没有可选的镜头或者资产,请先去创建'):
+            fileInfo['content'] != suggestion.taskContent):
             
             self.path = (self.path + fileInfo['createDate'] + '/' 
                          + fileInfo['projectName'] + '/' 
@@ -299,16 +291,14 @@ class Widget(QtGui.QWidget, Ui_Widget):
                 os.makedirs(self.path)
                 
             return True
-        else:
-            txtTitle = u'警告信息'
-            txtMainContent = u'发布失败！                                             '
-            if fileInfo['projectName'] ==  u'暂无项目请先创建':
-                txtSubContent = u"请选择项目名！"
-            elif fileInfo['content'] == u'没有可选的镜头或者资产,请先去创建':
-                txtSubContent = u"请选择镜头或者资产名！"
+        else:                               
+            if fileInfo['projectName'] == suggestion.projectContent:
+                txtSubContent = suggestion.selectProject
+            elif fileInfo['content'] == suggestion.taskContent:
+                txtSubContent = suggestion.selectTask
             else:
-                txtSubContent = u"文件名为空，请输入文件名！"
-                
-            Msg().showDialog(self.warning, txtTitle, txtMainContent, txtSubContent)
+                txtSubContent = suggestion.fileNameIsNull
+            self.warning.setIcon(QtGui.QMessageBox.Critical)     
+            Msg().showDialog(self.warning,suggestion.warning,suggestion.publishFailed, txtSubContent)
             return False    
         

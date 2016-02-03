@@ -1,5 +1,4 @@
 
-#coding=gb2312
 import unittest
 from setup.setuppublish import Widget
 

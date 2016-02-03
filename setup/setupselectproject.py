@@ -5,6 +5,7 @@ from common.uicommon import UI
 from common.uicommon import Msg
 from common.datacommon import Data 
 from common.funcommon import Fun
+import conf.msgconfig as suggestion
 
 class Widget(QtGui.QWidget, Ui_Widget):
 
@@ -35,10 +36,7 @@ class Widget(QtGui.QWidget, Ui_Widget):
             self.Widget.show() 
             self.close()                
         else:
-            txtTitle = u'提示信息'
-            txtMainContent = u'操作失败！                                             '
-            txtSubContent =  u'请选择一个项目！'
-            Msg().showDialog(self.warning, txtTitle, txtMainContent, txtSubContent)
+            Msg().showDialog(self.warning,suggestion.warning,suggestion.clickedFailed,suggestion.selectProject)
     
     #点击取消按钮触发的事件    
     def cancelClicked(self):

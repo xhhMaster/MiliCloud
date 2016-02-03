@@ -5,6 +5,8 @@ from common.datacommon import Data
 from common.uicommon import UI
 from common.uicommon import Msg
 from common.funcommon import Fun
+import conf.msgconfig as suggestion
+import conf.pathConfig as path
 
 class Widget(QtGui.QWidget, Ui_Widget):
     
@@ -18,13 +20,13 @@ class Widget(QtGui.QWidget, Ui_Widget):
         self.cacheAssetList = UI().initTableWidget(['ID','Image','Name','Type','ImgPath'],5)
         self.taskList = UI().initTableWidget(['ID','Image','Name','Type','ImgPath'],5) 
         self.setupUi(self)
-        self.searchSA.setStyleSheet("background-image: url(C:/Users/HH.Pic-p-127/Documents/maya/scripts/Image/search.png);\n"
+        self.searchSA.setStyleSheet("background-image: url("+ path.iconForSearch + ");\n"
                                     "background-repeat: no-repeat;\n"
                                     "background-position: center left;\n"
                                     "border-style: inset; \n"
                                     "border-radius: 9px; \n"
                                     "padding-left: 15px")
-        self.searchTask.setStyleSheet("background-image: url(C:/Users/HH.Pic-p-127/Documents/maya/scripts/Image/search.png);\n"
+        self.searchTask.setStyleSheet("background-image: url("+ path.iconForSearch +");\n"
                                     "background-repeat: no-repeat;\n"
                                     "background-position: center left;\n"
                                     "border-style: inset; \n"
@@ -91,7 +93,6 @@ class Widget(QtGui.QWidget, Ui_Widget):
         self.searchTask.clear()
         self.taskList.clearContents()
         self.taskList.setRowCount(0)
-        # Fun().sourceDataISNULL(self.taskList,'Task')
         if userInput != '':
             self.bindindSearchData(userInput,self.shotList,'Shot')
             self.bindindSearchData(userInput,self.assetList,'Asset')
@@ -105,7 +106,7 @@ class Widget(QtGui.QWidget, Ui_Widget):
     def taskTxtChanged(self):
         userInput = self.searchTask.text()
         self.resetUI()
-        if userInput != '' and self.taskList.item(0,0).text()!= u'没有Task相关内容':
+        if userInput != '' and self.taskList.item(0,0).text()!= suggestion.isNoTask:
             if (self.shotList.currentIndex().row() != -1 or
                 self.assetList.currentIndex().row() != -1 ):
                 self.bindindSearchData(userInput,self.taskList,'Task')
@@ -133,10 +134,7 @@ class Widget(QtGui.QWidget, Ui_Widget):
             self.Widget.show()   
             self.close()  
         else:
-            txtTitle = u'警告信息'
-            txtMainContent = u'打开失败！                                             '
-            txtSubContent =  u'请选择一个任务文件！'
-            Msg().showDialog(self.warning, txtTitle, txtMainContent, txtSubContent)
+            Msg().showDialog(self.warning,suggestion.warning,suggestion.clickedFailed,suggestion.selectTask)
     
     def showData(self,outputList):
         self.mainLayout.removeWidget(outputList)

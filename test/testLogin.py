@@ -12,7 +12,6 @@ class MiliCloudTest(unittest.TestCase):
     
 
     def testGetTaskName(self):
-        t3= '%d' %3
         print self.mili.callService('yingjun','1') 
     
   

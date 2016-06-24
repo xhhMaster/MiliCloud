@@ -1,21 +1,20 @@
 # -*- coding: utf-8 -*-
 import unittest
-from service.assetservice import AssetByType
+from service.versionservice import GetVersionByName
 
 class MiliCloudTest(unittest.TestCase):
-    
     def setUp(self):        
-        self.mili = AssetByType()
+        self.mili = GetVersionByName()
         
     
     def tearDown(self):  
         self.mili = None  
     
 
-    def testGetAssetName(self):
-        t1 = '%d' %5
-        t2 = '%d' %2
-        self.mili.callService(t2) 
+    def testGetTaskName(self):
+        print self.mili.callService('a1234.001.ma','88')
     
+  
 if __name__ == "__main__":  
-    unittest.main() 
+    unittest.main()  
+        

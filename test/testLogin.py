@@ -1,19 +1,25 @@
 # -*- coding: utf-8 -*-
 import unittest
-from service.loginservice import Login
+from service import loginservice
+
 class MiliCloudTest(unittest.TestCase):
-    
     def setUp(self):        
-        self.mili = Login()
+        self.mili = loginservice.Login()
         
-  
+    
     def tearDown(self):  
         self.mili = None  
-   
-    def testGetProjectName(self): 
-        t = '%d' %1
-        print self.mili.callService('admin',t)
+    
+
+    def testGetTaskName(self):
+        t3= '%d' %3
+        print self.mili.callService('yingjun','1') 
+    
   
 if __name__ == "__main__":  
     unittest.main()  
+        
+  
+   
+
 

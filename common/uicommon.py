@@ -12,7 +12,12 @@ class UI(object):
         table.setShowGrid(False)
         table.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
         table.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
-        table.horizontalHeader().setStretchLastSection(True)
+        table.horizontalHeader().setStretchLastSection(True)#设置充满表宽度
+        table.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        table.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
+        table.resizeColumnsToContents()
+        table.resizeRowsToContents()
+        #table.setFrameShape(QtGui.QFrame.NoFrame) #去除边框
         table.setHorizontalHeaderLabels(header)
         return table
     
@@ -23,6 +28,11 @@ class UI(object):
         okBtn.clicked.connect(warning.close)
         return warning   
     
+    def initListWidget(self):
+        List = QtGui.QListWidget() 
+        List.setFocusPolicy(QtCore.Qt.NoFocus)
+        return List
+        
 class Msg(object):
     #自定义显示子窗口
     def showDialog(self,outputWindow,txtTitle,txtMainContent,txtSubContent):
@@ -31,20 +41,3 @@ class Msg(object):
         outputWindow.setInformativeText(txtSubContent)
         outputWindow.show()
         
-class ThumbnailLabel(QtGui.QLabel):
-    """
-    Special case label that resizes pixmap that gets set to a specific size.  This
-    is duplicated from the tk-framework-widget browser_widget control
-    """
-    def __init__(self, parent=None):
-        QtGui.QLabel.__init__(self, parent)
-
-    def setPixmap(self, pixmap):
-        # scale the pixmap down to fit
-        if pixmap.height() > 55 or pixmap.width() > 80:
-            # scale it down to 120x80
-            pixmap = pixmap.scaled(QtCore.QSize(80,55), 
-                                   QtCore.Qt.KeepAspectRatio, 
-                                   QtCore.Qt.SmoothTransformation)
-        
-        QtGui.QLabel.setPixmap(self, pixmap)

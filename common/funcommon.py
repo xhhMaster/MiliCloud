@@ -1,105 +1,55 @@
 # -*- coding: utf-8 -*-
-import re
 from PySide import QtGui,QtCore
 import os
 from common.datacommon import Data
-import conf.msgconfig as suggestion
+import conf.path as confPath
 
 class Fun(object):
-    def fiterData(self,userinput,sourceList):
-        suggestions = []
-        pattern = '.*?'.join(userinput)   
-        regex = re.compile(pattern)
-        rows = sourceList.rowCount()
-        if rows > 0:
-            for rows_index in range(rows):
-                itemId = sourceList.item(rows_index,0).text()
-                itemName = sourceList.item(rows_index,2).text()
-                itemType = sourceList.item(rows_index,3).text()
-                itemPath = sourceList.item(rows_index,4).text()
-                match = regex.search(itemName) 
-                if match:
-                    suggestions.append((len(match.group()), match.start(), (itemId,itemName,itemType,itemPath)))
-                    
-            return [x for _, _, x in sorted(suggestions)]
-        else:
-            return suggestions
-    
-    def sourceDataISNULL(self,outputList,Flag):
-        outputList.clearContents()
-        outputList.setRowCount(1)
-        if Flag == 'Shot':
-            txt = suggestion.isNoShot
-        elif Flag == 'Asset':
-            txt = suggestion.isNoAsset
-        elif Flag == 'Project':
-            txt = suggestion.isNoProject
-        elif Flag == 'Work':
-            txt = suggestion.isNoWorkFile
-        else:
-            txt = suggestion.isNoTask
-        contentItem = QtGui.QTableWidgetItem(txt)
-        outputList.setColumnHidden(0,False)
-        outputList.setItem(0,0,contentItem) 
-        outputList.setSpan(0, 0, 1, 4)
-        outputList.setFocusPolicy(QtCore.Qt.NoFocus)
-        outputList.setSelectionMode(QtGui.QAbstractItemView.NoSelection)
-    
-    def bindingDataSingal(self,index,content,outputList,queryField,imgPath,Flag):
-        outputList.insertRow(index)   
-        itemId = QtGui.QTableWidgetItem(str(content[queryField[0]]))
-        if Flag not in ('Task','Work') :
-            if len(queryField) < 3:
-                txt = content[queryField[1]]
+    def getImgPath(self,imageId,entity_id,Flag,baseDir):
+        if imageId != '':
+            imgInfo = Data().getImg(str(imageId))
+            if len(imgInfo) > 0:
+                imgName = imgInfo[0][u'the_file']
             else:
-                txt = (content[queryField[1]]+ u'\n描述：' + 
-                           content[queryField[2]])
-        else:
-            if  len(queryField) < 3:
-                txt = content[queryField[1]]
+                imgName = ''
+           
+            if imgName != '':
+                filePath = confPath.downLoadImg + Flag + '/' + str(entity_id) + '/'
+                if not os.path.exists(filePath):
+                    os.makedirs(filePath)
+                fullPath = filePath + imgName
             else:
-                txt = (content[queryField[1]]+ u'\n制作人：' + 
-                str(content[queryField[2]]))
-        itemName = QtGui.QTableWidgetItem(txt)
-        itemType = QtGui.QTableWidgetItem(Flag)
-        itemPath = QtGui.QTableWidgetItem(imgPath)
-        outputList.setItem(index,0,itemId)
-        outputList.setCellWidget(index,1,self.setImg(imgPath))
-        outputList.setItem(index,2,itemName)
-        outputList.setItem(index,3,itemType)
-        outputList.setItem(index,4,itemPath)
-        outputList.setRowHeight(index,90)
-  
-    def setImg(self,imgPath):
-        imgLabel = QtGui.QLabel()
+                fullPath = confPath.defaultImgPath
+            
+            directory = baseDir + str(imageId) +'/'+ imgName
+            if fullPath != confPath.defaultImgPath:
+                if os.path.exists(fullPath):
+                    os.remove(fullPath)
+                code = Data().downLoad(directory,fullPath)
+                if code == 404:
+                    fullPath = confPath.defaultImgPath
+        else:
+            fullPath = confPath.defaultImgPath
+        return fullPath
+    
+    def bindingList(self,index,content,outputList,imgPath,Flag):
+        newItem = QtGui.QListWidgetItem()
         pixmap = QtGui.QPixmap(imgPath)
-        pixmap = pixmap.scaled(QtCore.QSize(120,80), 
-                               QtCore.Qt.KeepAspectRatio, 
-                               QtCore.Qt.SmoothTransformation)
-        imgLabel.setPixmap(pixmap)
-        return imgLabel    
-    
-    def getImgPath(self,imageId,baseDir):
-        imgInfo = Data().getImgName(imageId)
-        if len(imgInfo)>0:
-            imgName = imgInfo[0][u'the_file']
+        newItem.setIcon(pixmap.scaled(QtCore.QSize(122,95)))
+        newItem.setSizeHint(QtCore.QSize(122,95))
+        if Flag == 'Work':
+            newItem.setData(QtCore.Qt.UserRole,content['versionId'])
+            newItem.setData(QtCore.Qt.UserRole+2,content['id'])
         else:
-            imgName = '000.png' 
-        filePath = 'D:/mayaDownload/Image/'
-        pathDir = os.path.exists(filePath)
-        if not pathDir:
-            os.makedirs(filePath)
-        
-        fullPathFileName = filePath + imgName
-        directory = baseDir +imageId+'/'+ imgName
-        if not os.path.exists(fullPathFileName):
-            Data().downLoad(directory,fullPathFileName)
-        return fullPathFileName   
-    
-    def setTableShow(self,outputList):
-        outputList.setColumnWidth(1,120)
-        outputList.setColumnHidden(0,True)
-        outputList.setColumnHidden(3,True)
-        outputList.setColumnHidden(4,True)
-        outputList.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
+            newItem.setData(QtCore.Qt.UserRole,content['id'])
+        newItem.setData(QtCore.Qt.UserRole+1,Flag)
+        if Flag in ('Task','Work') :
+            if Flag == 'Work':
+                txt = (content['code']+ u'\n上传人：' + content['user_name'] + u'\n上传时间：' + content['created_at'])
+            else:
+                txt = (content['name']+ u'\n上传人：' + content['user_name'])
+        else:
+            txt = content['name'] + u'\n描述：' + content['description']
+        newItem.setText(txt)
+        outputList.insertItem(index, newItem)
     

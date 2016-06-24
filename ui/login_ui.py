@@ -21,12 +21,12 @@ class Ui_Widget(object):
         self.userName = QtGui.QLineEdit(self.formLayoutWidget)
         self.userName.setObjectName("userName")
         self.userName.setMinimumHeight(20)
-        
         self.formLayout.setWidget(0, QtGui.QFormLayout.FieldRole, self.userName)
         self.pwLabel = QtGui.QLabel(self.formLayoutWidget)
         self.pwLabel.setObjectName("pwLabel")
         self.formLayout.setWidget(1, QtGui.QFormLayout.LabelRole, self.pwLabel)
         self.passWord = QtGui.QLineEdit(self.formLayoutWidget)
+        self.passWord.setEchoMode(QtGui.QLineEdit.Password)
         self.passWord.setObjectName("passWord")
         self.passWord.setMinimumHeight(20)
         self.formLayout.setWidget(1, QtGui.QFormLayout.FieldRole, self.passWord)

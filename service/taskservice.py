@@ -1,43 +1,52 @@
 # -*- coding: utf-8 -*-
 import lib.requests as requests
-import conf.apiconfig as conf
+import conf.config as conf
+
+base = conf.read_config(conf.path, 'API', 'baseUrl')
+
 
 class Task(object):
     def __getTask(self,entity_id,entity_type,uid,pid):
-        url = conf.taskApi + entity_id + '&entity_type='+ entity_type + '&uid='+ uid + '&project_id=' + pid
+        api = conf.read_config(conf.path, 'API', 'getTaskApi')
+        url = (base + api + '?entity_id=' + entity_id + 
+            '&entity_type='+ entity_type + 
+            '&uid='+ uid + 
+            '&project_id=' + pid )
+        s = requests.Session()
         result = requests.post(url)
+        s.keep_alive = False     
         if result.text != u"null":
             return result.json()['TASKS']
         else:
             return ""
         
-   
     def callService(self,entity_id,entity_type,uid,pid):
         return self.__getTask(entity_id,entity_type,uid,pid)
     
-class SingalTask(object):
-    def __getSingalTask(self,uid,entity_id,entity_type,taskId,pid):
-        url = conf.singalTaskApi + uid + '&project_id='+ pid+'&entity_id=' + entity_id + '&entity_type=' + entity_type + '&task_id='+taskId
-        result = requests.post(url)
+class SingleTask(object):
+    def __getSingleTask(self,uid,taskId,stepId):
+        api = conf.read_config(conf.path, 'API', 'getSingleTaskApi')
+        url = (base + api + '?uid=' + uid + '&task_id=' + taskId + '&step_id=' + stepId)
+        s = requests.session()
+        result = s.post(url)
+        s.keep_alive = False   
         if result.text != u"null":
             return result.json()['TASK']
         else:
             return ""   
     
-      
-    def callService(self,uid,entity_id,entity_type,taskId,pid):
-        return self.__getSingalTask(uid,entity_id,entity_type,taskId,pid)    
+    def callService(self,uid,taskId,stepId):
+        return self.__getSingleTask(uid,taskId,stepId)    
           
-class MyTask(object):
-    def __getMyTask(self,uid,pid,entity_type):
-        url = conf.myTaskApi + uid + '&project_id=' + pid + '&entity_type=' + entity_type
-        result = requests.post(url)
-        if result.text != u"null":
-            return result.json()['MYTASK']
-        else:
-            return ""
-    
-    def callService(self,uid,pid,entity_type):
-        return self.__getMyTask(uid,pid,entity_type)
-    
+class TaskStep(object):
+    def __getTaskStep(self,uid,pid,tableName):
+        api = conf.read_config(conf.path, 'API', 'getTaskStepApi')
+        url = base + api + '?user_id=' +  uid  + '&project_id='+ pid
+        s = requests.session()
+        result = s.post(url)
+        s.keep_alive = False   
+        return result.json()[tableName]
+          
+    def callService(self,uid,pid,tableName):
+        return self.__getTaskStep(uid,pid,tableName)
     

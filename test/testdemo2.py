@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 import unittest
-from service import thumbnailservice
+from service.versionservice import GetVersionByName
 
 class MiliCloudTest(unittest.TestCase):
     def setUp(self):        
-        self.mili = thumbnailservice.SelectImg()
+        self.mili = GetVersionByName()
         
     
     def tearDown(self):  
@@ -12,9 +12,10 @@ class MiliCloudTest(unittest.TestCase):
     
 
     def testGetTaskName(self):
-        t3= '%d' %3
-        self.mili.callService(t3) 
+        t3= [293, 285, 297]
+        print self.mili.callService('a1234.001.ma','88')
     
   
 if __name__ == "__main__":  
     unittest.main()  
+        

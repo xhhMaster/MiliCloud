@@ -1,13 +1,18 @@
 # -*- coding: utf-8 -*-
 import lib.requests as requests
-import conf.apiconfig as conf
+import conf.config as conf
+
 
 class DownLoad(object):
     def __download(self,directory,fullfileName):
-        url = conf.downloadApi+directory
+        api = conf.read_config(conf.path, 'API', 'downloadApi')
+        url = api +directory
         r = requests.get(url)
-        with open(fullfileName, "wb") as code:
-            code.write(r.content)      
+        if r.status_code != 404:
+            with open(fullfileName, "wb") as code:
+                code.write(r.content)
+        return r.status_code
+       
 
         
     def callService(self,directory,fullfileName):

@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 from PySide import QtCore, QtGui
 
 class Ui_Widget(object):

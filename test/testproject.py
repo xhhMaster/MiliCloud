@@ -12,8 +12,7 @@ class MiliCloudTest(unittest.TestCase):
         self.mili = None  
    
     def testGetProjectName(self): 
-        t = '%d' %2  
-        print self.mili.callInfoService(t)
+        print self.mili.callService('6')
   
 if __name__ == "__main__":  
     unittest.main()  
